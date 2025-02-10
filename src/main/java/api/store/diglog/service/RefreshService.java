@@ -5,8 +5,11 @@ import java.util.stream.Collectors;
 import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.common.exception.ErrorCode;
 import api.store.diglog.model.constant.Role;
+import api.store.diglog.model.dto.member.MemberInfoResponse;
+import api.store.diglog.model.vo.login.RenewRefreshTokenVO;
 import api.store.diglog.model.vo.login.TokenVO;
 import api.store.diglog.model.vo.member.MemberInfoVO;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import api.store.diglog.common.auth.JWTUtil;
@@ -39,16 +42,38 @@ public class RefreshService {
     }
 
     @Transactional
+    public RenewRefreshTokenVO renewRefresh(String refreshToken) {
+        MemberInfoResponse memberInfoResponse;
+        if (!(jwtUtil.validateRefreshToken(refreshToken) && isExists(refreshToken))) {
+            memberInfoResponse = MemberInfoResponse.builder()
+                    .status(401)
+                    .build();
+            return RenewRefreshTokenVO.builder()
+                    .memberInfoResponse(memberInfoResponse)
+                    .build();
+        }
+
+        TokenVO tokenVO = getNewToken(refreshToken);
+        memberInfoResponse = MemberInfoResponse.builder()
+                .status(200)
+                .email(tokenVO.getEmail())
+                .username(tokenVO.getUsername())
+                .roles(tokenVO.getRoles())
+                .build();
+
+        return RenewRefreshTokenVO.builder()
+                .tokenVO(tokenVO)
+                .memberInfoResponse(memberInfoResponse)
+                .build();
+    }
+
+    @Transactional
     public void delete(String email) {
         refreshRepository.deleteAllByEmail(email);
     }
 
     public boolean isExists(String refreshToken) {
         return refreshRepository.countByRefreshToken(refreshToken) > 0;
-    }
-
-    public boolean isValid(String refreshToken) {
-        return jwtUtil.validateRefreshToken(refreshToken) && isExists(refreshToken);
     }
 
     @Transactional

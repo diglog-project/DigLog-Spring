@@ -18,42 +18,42 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody PostRequest postRequest) {
+    public ResponseEntity<Void> save(@RequestBody PostRequest postRequest) {
         postService.save(postRequest);
 
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping
-    public ResponseEntity<?> update(@RequestBody PostUpdateRequest postUpdateRequest) {
+    public ResponseEntity<Void> update(@RequestBody PostUpdateRequest postUpdateRequest) {
         postService.update(postUpdateRequest);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPost(@PathVariable UUID id) {
+    public ResponseEntity<PostResponse> getPost(@PathVariable UUID id) {
         PostResponse postResponse = postService.getPost(id);
 
         return ResponseEntity.ok().body(postResponse);
     }
 
     @GetMapping
-    public ResponseEntity<?> getPosts(@ParameterObject @ModelAttribute PostListRequest postListRequest) {
+    public ResponseEntity<Page<PostResponse>> getPosts(@ParameterObject @ModelAttribute PostListRequest postListRequest) {
         Page<PostResponse> postResponses = postService.getPosts(postListRequest);
 
         return ResponseEntity.ok().body(postResponses);
     }
 
     @GetMapping("/tag")
-    public ResponseEntity<?> getPostsTag(@ParameterObject @ModelAttribute PostListTagRequest postListTagRequest) {
+    public ResponseEntity<Page<PostResponse>> getPostsTag(@ParameterObject @ModelAttribute PostListTagRequest postListTagRequest) {
         Page<PostResponse> postResponses = postService.getPostsTag(postListTagRequest);
 
         return ResponseEntity.ok().body(postResponses);
     }
 
     @PatchMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         postService.delete(id);
 
         return ResponseEntity.ok().build();

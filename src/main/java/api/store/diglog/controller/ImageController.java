@@ -18,7 +18,7 @@ public class ImageController {
     @PostMapping(
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> uploadImage(ImageRequest imageRequest) {
+    public ResponseEntity<ImageUrlResponse> uploadImage(ImageRequest imageRequest) {
         ImageUrlResponse imageUrlResponse = imageService.uploadImage(imageRequest);
 
         return ResponseEntity.ok().body(imageUrlResponse);

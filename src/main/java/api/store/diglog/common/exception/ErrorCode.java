@@ -11,7 +11,7 @@ import static org.springframework.http.HttpStatus.*;
 public enum ErrorCode {
 
     // Member
-    LOGIN_FAILED(BAD_REQUEST, "이메일 또는 비밀번호가 일치하지 않습니다."),
+    LOGIN_INPUT_CREDENTIALS_MISMATCH(BAD_REQUEST, "이메일 또는 비밀번호가 일치하지 않습니다."),
     SIGNUP_MEMBER_EXISTS(CONFLICT, "이미 가입된 회원입니다."),
     SIGNUP_PLATFORM_DUPLICATED(CONFLICT, "다른 방법으로 회원가입 되어있습니다. 다른 로그인 방법으로 시도해주세요."),
     SIGNUP_MAIL_SEND_FAILED(INTERNAL_SERVER_ERROR, "메일 발송 중 오류가 발생하였습니다."),
