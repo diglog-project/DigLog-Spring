@@ -5,6 +5,8 @@ import api.store.diglog.model.dto.image.ImageRequest;
 import api.store.diglog.model.dto.image.ImageUrlResponse;
 import api.store.diglog.model.entity.Image;
 import api.store.diglog.model.vo.image.ImagePostVO;
+import api.store.diglog.model.vo.image.ImageSaveVO;
+import api.store.diglog.model.vo.image.ImageUrlVO;
 import api.store.diglog.repository.ImageRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,31 @@ public class ImageService {
         return ImageUrlResponse.builder()
                 .url(url)
                 .build();
+    }
+
+    @Transactional
+    public ImageUrlResponse uploadAndSaveImage(ImageSaveVO imageSaveVO) {
+        String url = s3Util.uploadImage(imageSaveVO.getFile());
+
+        List<String> deletedUrls = deleteImageByRefId(imageSaveVO.getRefId());
+
+        Image image = Image.builder()
+                .refId(imageSaveVO.getRefId())
+                .url(url)
+                .build();
+        imageRepository.save(image);
+
+        s3Util.deleteImages(deletedUrls);
+
+        return ImageUrlResponse.builder()
+                .url(url)
+                .build();
+    }
+
+    private List<String> deleteImageByRefId(UUID refId) {
+        return imageRepository.deleteAllByRefId(refId).stream()
+                .map(Image::getUrl)
+                .toList();
     }
 
     public void savePostImage(ImagePostVO imagePostVO) {
@@ -65,5 +92,15 @@ public class ImageService {
                         .build())
                 .toList();
         imageRepository.saveAll(images);
+    }
+
+    public ImageUrlVO getUrlByRefId(UUID refId) {
+        List<Image> images = imageRepository.findByRefId(refId);
+
+        if (images.isEmpty()) {
+            return ImageUrlVO.builder().build();
+        }
+
+        return ImageUrlVO.builder().url(images.getFirst().getUrl()).build();
     }
 }

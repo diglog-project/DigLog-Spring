@@ -103,7 +103,7 @@ class EmailVerificationServiceTest {
             return Stream.of(
                     Arguments.of(INVALID_CREATED_AT, EMAIL, CODE, CustomException.class),
                     Arguments.of(CREATED_AT, INVALID_EMAIL, CODE, CustomException.class),
-                    Arguments.of(CREATED_AT, EMAIL, INVALID_CODE, CustomException.class) // todo: 에러 class 수정
+                    Arguments.of(CREATED_AT, EMAIL, INVALID_CODE, CustomException.class)
             );
         }
     }

@@ -91,6 +91,36 @@ class MemberControllerTest {
         assertThat(data.get("username").asText()).isEqualTo("test");
     }
 
+    @Test
+    @DisplayName("로그인 상태가 아닌 경우 401을 반환한다.")
+    void getProfile2() throws Exception {
+        // given
+        // when
+        MvcResult result = mockMvc.perform(get("/api/member/profile"))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(401);
+    }
+
+    @Test
+    @DisplayName("username으로 다른 사용자의 profile 정보를 받아온다.")
+    void getProfileByUsername() throws Exception {
+        // given
+        String username = "test";
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/member/profile/" + username))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(data.get("username").asText()).isEqualTo("test");
+    }
+
     private Member defaultMember(String email) {
         return Member.builder()
                 .email(email)

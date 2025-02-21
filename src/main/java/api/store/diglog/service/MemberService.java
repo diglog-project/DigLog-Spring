@@ -2,17 +2,23 @@ package api.store.diglog.service;
 
 import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.common.util.SecurityUtil;
+import api.store.diglog.model.dto.image.ImageRequest;
+import api.store.diglog.model.dto.image.ImageUrlResponse;
 import api.store.diglog.model.dto.login.LoginRequest;
+import api.store.diglog.model.dto.member.MemberProfileInfoResponse;
 import api.store.diglog.model.dto.member.MemberProfileResponse;
 import api.store.diglog.model.dto.member.MemberUsernameRequest;
 import api.store.diglog.model.entity.Member;
+import api.store.diglog.model.vo.image.ImageSaveVO;
 import api.store.diglog.repository.MemberRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import static api.store.diglog.common.exception.ErrorCode.LOGIN_FAILED;
-import static api.store.diglog.common.exception.ErrorCode.MEMBER_EMAIL_NOT_FOUND;
+import java.util.UUID;
+
+import static api.store.diglog.common.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +26,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ImageService imageService;
 
     // 현재 api 요청을 보낸 Member
     public Member getCurrentMember() {
@@ -45,13 +52,33 @@ public class MemberService {
     }
 
     public MemberProfileResponse getProfile() {
-        String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(LOGIN_FAILED));
+        Member member = getCurrentMember();
 
         return MemberProfileResponse.builder()
-                .email(email)
+                .email(member.getEmail())
                 .username(member.getUsername())
+                .profileUrl(imageService.getUrlByRefId(member.getId()).getUrl())
                 .build();
+    }
+
+    public MemberProfileInfoResponse getProfileByUsername(String username) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(MEMBER_USERNAME_NOT_FOUND));
+
+        return MemberProfileInfoResponse.builder()
+                .username(member.getUsername())
+                .profileUrl(imageService.getUrlByRefId(member.getId()).getUrl())
+                .build();
+    }
+
+    @Transactional
+    public ImageUrlResponse updateProfileImage(ImageRequest imageRequest) {
+        UUID refId = getCurrentMember().getId();
+        ImageSaveVO imageSaveVO = ImageSaveVO.builder()
+                .refId(refId)
+                .file(imageRequest.getFile())
+                .build();
+
+        return imageService.uploadAndSaveImage(imageSaveVO);
     }
 }

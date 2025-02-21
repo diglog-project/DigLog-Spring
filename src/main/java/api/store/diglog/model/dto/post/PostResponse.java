@@ -4,6 +4,7 @@ import api.store.diglog.model.dto.tag.TagResponse;
 import api.store.diglog.model.entity.Post;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ public class PostResponse {
     private String content;
     private String username;
     private List<TagResponse> tags;
+    private LocalDateTime createdAt;
 
     public PostResponse(Post post) {
         this.id = post.getId();
@@ -24,5 +26,6 @@ public class PostResponse {
         this.tags = post.getTags().stream()
                 .map(TagResponse::new)
                 .toList();
+        this.createdAt = post.getCreatedAt();
     }
 }

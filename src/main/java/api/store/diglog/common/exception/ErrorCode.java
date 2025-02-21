@@ -20,6 +20,7 @@ public enum ErrorCode {
     SIGNUP_CODE_NOT_MATCHED(BAD_REQUEST, "인증 코드가 일치하지 않습니다."),
     SIGNUP_CODE_EXPIRED(BAD_REQUEST, "코드 유효기간이 만료되었습니다."),
     MEMBER_EMAIL_NOT_FOUND(BAD_REQUEST, "해당 이메일을 가진 회원이 없습니다."),
+    MEMBER_USERNAME_NOT_FOUND(BAD_REQUEST, "해당 이름을 가진 회원이 없습니다."),
 
     // S3
     S3_WRONG_FILE(BAD_REQUEST, "이미지 Byte를 얻는데 실패했습니다. 이미지를 다시 확인해주세요."),
