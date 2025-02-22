@@ -40,7 +40,8 @@ public class EmailVerificationService {
 
     public void sendMail(String email) {
         if (memberRepository.findByEmail(email).isPresent()) {
-            throw new CustomException(SIGNUP_MEMBER_EXISTS);
+//            throw new CustomException(SIGNUP_MEMBER_EXISTS);
+            throw new CustomException(TEST_CUSTOM_MESSAGE, email, 1, "duplicate email");
         }
 
         emailVerificationRepository.deleteAllByEmail(email);

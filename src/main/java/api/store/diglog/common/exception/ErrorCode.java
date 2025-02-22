@@ -32,12 +32,18 @@ public enum ErrorCode {
     POST_DELETE_FAILED(FORBIDDEN, "게시글 삭제가 완료되지 않았습니다."),
     POST_NO_PERMISSION(FORBIDDEN, "게시글 수정 권한이 없습니다."),
 
+    TEST_CUSTOM_MESSAGE(BAD_REQUEST, "테스트 에러 메세지 %s / %d / %s"),
+
     ;
 
     private final HttpStatus status;
-    private final String message;
+    private String message;
 
     public String getErrorCode() {
         return this.name();
+    }
+
+    public void formatMessage(final Object... args) {
+        this.message = String.format(this.message, args);
     }
 }
