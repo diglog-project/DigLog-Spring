@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContext;
@@ -42,10 +41,6 @@ public class PostControllerUnitTestExample {
 
     @MockitoBean
     PostService postService;
-
-    // DiglogApplication의 @EnableJpaAuditing 구현 때문 -> Configuration 분리해서 없앨 수 있음 (노션 참고)
-    @MockitoBean
-    JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     private static final String EMAIL = "diglog@example.com";
     private static final String PASSWORD = "qwer1234";
