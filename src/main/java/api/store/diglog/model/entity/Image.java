@@ -1,10 +1,7 @@
 package api.store.diglog.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -15,9 +12,7 @@ import java.util.UUID;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Image {
 
     @Id
@@ -35,4 +30,13 @@ public class Image {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Builder
+    public Image(UUID id, UUID refId, String url, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.refId = refId;
+        this.url = url;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }

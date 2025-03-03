@@ -9,13 +9,13 @@ import api.store.diglog.model.entity.Tag;
 import api.store.diglog.model.vo.image.ImagePostVO;
 import api.store.diglog.model.vo.tag.TagPostVO;
 import api.store.diglog.repository.PostRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +25,7 @@ import static api.store.diglog.common.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PostService {
 
     private final PostRepository postRepository;
@@ -140,6 +141,7 @@ public class PostService {
                 .map(PostResponse::new);
     }
 
+    @Transactional
     public void delete(UUID id) {
         Member member = memberService.getCurrentMember();
 

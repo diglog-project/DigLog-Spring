@@ -18,28 +18,28 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody PostRequest postRequest) {
+    public ResponseEntity<Void> save(@RequestBody PostRequest postRequest) {
         postService.save(postRequest);
 
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping
-    public ResponseEntity<?> update(@RequestBody PostUpdateRequest postUpdateRequest) {
+    public ResponseEntity<Void> update(@RequestBody PostUpdateRequest postUpdateRequest) {
         postService.update(postUpdateRequest);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPost(@PathVariable UUID id) {
+    public ResponseEntity<PostResponse> getPost(@PathVariable UUID id) {
         PostResponse postResponse = postService.getPost(id);
 
         return ResponseEntity.ok().body(postResponse);
     }
 
     @GetMapping
-    public ResponseEntity<?> getPosts(@ParameterObject @ModelAttribute PostListSearchRequest postListSearchRequest) {
+    public ResponseEntity<Page<PostResponse>> getPosts(@ParameterObject @ModelAttribute PostListSearchRequest postListSearchRequest) {
         Page<PostResponse> postResponses = postService.getPosts(postListSearchRequest);
 
         return ResponseEntity.ok().body(postResponses);
@@ -53,14 +53,14 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> getPostsTag(@ParameterObject @ModelAttribute PostListSearchRequest postListSearchRequest) {
+    public ResponseEntity<Page<PostResponse>> getPostsTag(@ParameterObject @ModelAttribute PostListSearchRequest postListSearchRequest) {
         Page<PostResponse> postResponses = postService.searchPosts(postListSearchRequest);
 
         return ResponseEntity.ok().body(postResponses);
     }
 
     @PatchMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         postService.delete(id);
 
         return ResponseEntity.ok().build();

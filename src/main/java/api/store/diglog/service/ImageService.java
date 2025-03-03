@@ -8,15 +8,16 @@ import api.store.diglog.model.vo.image.ImagePostVO;
 import api.store.diglog.model.vo.image.ImageSaveVO;
 import api.store.diglog.model.vo.image.ImageUrlVO;
 import api.store.diglog.repository.ImageRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ImageService {
 
     private final ImageRepository imageRepository;
@@ -56,6 +57,7 @@ public class ImageService {
                 .toList();
     }
 
+    @Transactional
     public void savePostImage(ImagePostVO imagePostVO) {
         UUID refId = imagePostVO.getId();
 

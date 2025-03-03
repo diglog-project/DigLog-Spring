@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -22,17 +23,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
 
     @Id
@@ -59,11 +54,24 @@ public class Member {
     private Platform platform;
 
     @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean isDeleted = false;
+    private boolean isDeleted;
 
     @CreatedDate
     private LocalDateTime createdAt;
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Builder
+    public Member(UUID id, String email, String username, String password, Set<Role> roles, Platform platform, boolean isDeleted, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.email = email;
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
+        this.platform = platform;
+        this.isDeleted = isDeleted;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }

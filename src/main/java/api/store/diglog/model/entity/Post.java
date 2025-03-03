@@ -20,14 +20,14 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id")
     private Folder folder;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "post_tag",
             joinColumns = @JoinColumn(name = "post_id"),
@@ -41,7 +41,7 @@ public class Post {
     private String content;
 
     @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean isDeleted = false;
+    private boolean isDeleted;
 
     @CreatedDate
     private LocalDateTime createdAt;

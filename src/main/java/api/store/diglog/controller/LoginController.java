@@ -1,21 +1,18 @@
 package api.store.diglog.controller;
 
-import api.store.diglog.common.auth.JWTUtil;
-import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.login.LoginRequest;
 import api.store.diglog.model.dto.login.LogoutRequest;
 import api.store.diglog.model.dto.member.MemberInfoResponse;
-import api.store.diglog.model.entity.Member;
+import api.store.diglog.model.vo.login.LoginTokenVO;
+import api.store.diglog.model.vo.login.LogoutTokenVO;
+import api.store.diglog.model.vo.login.RenewRefreshTokenVO;
 import api.store.diglog.model.vo.login.TokenVO;
 import api.store.diglog.service.MemberService;
 import api.store.diglog.service.RefreshService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/member")
@@ -24,70 +21,45 @@ public class LoginController {
 
     private final MemberService memberService;
     private final RefreshService refreshService;
-    private final JWTUtil jwtUtil;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(
+    public ResponseEntity<MemberInfoResponse> login(
             @RequestBody LoginRequest loginRequest,
             HttpServletResponse response) {
-        Member member = memberService.login(loginRequest);
+        LoginTokenVO loginTokenVO = memberService.login(loginRequest);
 
-        String accessToken = jwtUtil.generateAccessToken(member);
-        response.addHeader("Authorization", "Bearer " + accessToken);
+        response.addHeader("Authorization", "Bearer " + loginTokenVO.getAccessToken());
+        response.addCookie(loginTokenVO.getRefreshTokenCookie());
 
-        Cookie refreshTokenCookie = jwtUtil.generateRefreshCookie(member);
-        response.addCookie(refreshTokenCookie);
-        refreshService.save(member.getEmail(), refreshTokenCookie.getValue());
-
-        MemberInfoResponse memberInfoResponse = MemberInfoResponse.builder()
-                .status(200)
-                .email(member.getEmail())
-                .username(member.getUsername())
-                .roles(member.getRoles().stream().map(Role::getRole).collect(Collectors.toSet()))
-                .build();
-
-        return ResponseEntity.ok().body(memberInfoResponse);
+        return ResponseEntity.ok().body(loginTokenVO.getMemberInfoResponse());
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(
+    public ResponseEntity<Void> logout(
             @RequestBody LogoutRequest logoutRequest,
             HttpServletResponse response) {
-        response.addCookie(jwtUtil.generateLogoutCookie());
-        refreshService.delete(logoutRequest.getEmail());
+        LogoutTokenVO logoutTokenVO = memberService.logout(logoutRequest);
+
+        response.addCookie(logoutTokenVO.getLogoutCookie());
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/refresh")
-    public ResponseEntity<?> refresh(
+    public ResponseEntity<MemberInfoResponse> refresh(
             @CookieValue(value = "refreshToken", defaultValue = "")
             String refreshToken,
             HttpServletResponse response) {
-        MemberInfoResponse memberInfoResponse;
+        RenewRefreshTokenVO renewRefreshTokenVO = refreshService.renewRefresh(refreshToken);
 
-        if (!refreshService.isValid(refreshToken)) {
-            memberInfoResponse = MemberInfoResponse.builder()
-                    .status(401)
-                    .build();
-            return ResponseEntity.ok().body(memberInfoResponse);
+        TokenVO tokenVO = renewRefreshTokenVO.getTokenVO();
+        if (tokenVO != null) {
+            response.addHeader("Authorization", "Bearer " + tokenVO.getAccessToken());
+            if (tokenVO.getRefreshTokenCookie() != null) {
+                response.addCookie(tokenVO.getRefreshTokenCookie());
+            }
         }
 
-        TokenVO tokenVO = refreshService.getNewToken(refreshToken);
-
-        response.addHeader("Authorization", "Bearer " + tokenVO.getAccessToken());
-
-        if (tokenVO.getRefreshTokenCookie() != null) {
-            response.addCookie(tokenVO.getRefreshTokenCookie());
-        }
-
-        memberInfoResponse = MemberInfoResponse.builder()
-                .status(200)
-                .email(tokenVO.getEmail())
-                .username(tokenVO.getUsername())
-                .roles(tokenVO.getRoles())
-                .build();
-
-        return ResponseEntity.ok().body(memberInfoResponse);
+        return ResponseEntity.ok().body(renewRefreshTokenVO.getMemberInfoResponse());
     }
 }

@@ -15,14 +15,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static api.store.diglog.common.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CommentService {
 
     private final CommentRepository commentRepository;
@@ -30,6 +31,7 @@ public class CommentService {
 
     private static final int MAX_DEPTH = 2;
 
+    @Transactional
     public void save(CommentRequest commentRequest) {
         Member member = memberService.getCurrentMember();
         Post post = Post.builder().id(commentRequest.getPostId()).build();
@@ -91,6 +93,7 @@ public class CommentService {
                 : null;
     }
 
+    @Transactional
     public void update(CommentUpdateRequest commentUpdateRequest) {
         Member member = memberService.getCurrentMember();
 
@@ -101,19 +104,13 @@ public class CommentService {
             throw new CustomException(COMMENT_UPDATE_NO_AUTHORITY);
         }
 
-        Comment updateComment = Comment.builder()
-                .id(comment.getId())
-                .content(commentUpdateRequest.getContent())
-                .taggedMember(getTaggedMember(commentUpdateRequest.getTaggedUsername()))
-                .post(comment.getPost())
-                .parentComment(comment.getParentComment())
-                .member(member)
-                .isDeleted(comment.isDeleted())
-                .createdAt(comment.getCreatedAt())
-                .build();
-        commentRepository.save(updateComment);
+        comment.updateContent(commentUpdateRequest.getContent());
+        comment.updateTaggedMember(getTaggedMember(commentUpdateRequest.getTaggedUsername()));
+
+        commentRepository.save(comment);
     }
 
+    @Transactional
     public void delete(UUID commentId) {
         Member member = memberService.getCurrentMember();
 

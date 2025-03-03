@@ -3,6 +3,7 @@ package api.store.diglog.model.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -13,17 +14,11 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmailVerification {
 
     @Id
@@ -44,4 +39,14 @@ public class EmailVerification {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Builder
+    public EmailVerification(UUID id, String email, String code, boolean verified, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.email = email;
+        this.code = code;
+        this.verified = verified;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }

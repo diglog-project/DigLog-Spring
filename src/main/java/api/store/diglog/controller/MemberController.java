@@ -22,14 +22,14 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/username")
-    public ResponseEntity<?> updateUsername(@RequestBody MemberUsernameRequest memberUsernameRequest) {
+    public ResponseEntity<Void> updateUsername(@RequestBody MemberUsernameRequest memberUsernameRequest) {
         memberService.updateUsername(memberUsernameRequest);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile() {
+    public ResponseEntity<MemberProfileResponse> getProfile() {
         MemberProfileResponse memberInfoResponse = memberService.getProfile();
 
         return ResponseEntity.ok().body(memberInfoResponse);

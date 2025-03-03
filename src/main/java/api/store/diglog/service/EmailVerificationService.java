@@ -11,12 +11,12 @@ import api.store.diglog.repository.EmailVerificationRepository;
 import api.store.diglog.repository.MemberRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -28,6 +28,7 @@ import static api.store.diglog.common.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class EmailVerificationService {
 
     @Value("${spring.mail.username}")
@@ -38,6 +39,7 @@ public class EmailVerificationService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public void sendMail(String email) {
         if (memberRepository.findByEmail(email).isPresent()) {
             throw new CustomException(SIGNUP_MEMBER_EXISTS);
@@ -77,6 +79,7 @@ public class EmailVerificationService {
         }
     }
 
+    @Transactional
     public void checkCode(EmailVerificationRequest emailVerificationRequest) {
         String email = emailVerificationRequest.getEmail();
         String code = emailVerificationRequest.getCode();

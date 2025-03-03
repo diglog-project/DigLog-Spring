@@ -34,7 +34,7 @@ public class Comment {
     private Member taggedMember;
 
     @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean isDeleted = false;
+    private boolean isDeleted;
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
@@ -57,5 +57,13 @@ public class Comment {
         this.taggedMember = taggedMember;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void updateTaggedMember(Member taggedMember) {
+        this.taggedMember = taggedMember;
     }
 }
