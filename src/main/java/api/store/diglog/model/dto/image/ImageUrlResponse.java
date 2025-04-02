@@ -8,5 +8,5 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ImageUrlResponse {
 
-    private String url;
+	private String url;
 }

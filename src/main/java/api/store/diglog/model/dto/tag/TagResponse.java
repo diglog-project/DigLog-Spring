@@ -11,11 +11,11 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class TagResponse {
 
-    private UUID id;
-    private String name;
+	private UUID id;
+	private String name;
 
-    public TagResponse(Tag tag) {
-        this.id = tag.getId();
-        this.name = tag.getName();
-    }
+	public TagResponse(Tag tag) {
+		this.id = tag.getId();
+		this.name = tag.getName();
+	}
 }

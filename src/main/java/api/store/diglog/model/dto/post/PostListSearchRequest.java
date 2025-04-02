@@ -12,10 +12,10 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostListSearchRequest {
 
-    private String keyword;
-    private SearchOption option;
-    private List<String> sorts;
-    private int page;
-    private int size;
-    private Boolean isDescending;
+	private String keyword;
+	private SearchOption option;
+	private List<String> sorts;
+	private int page;
+	private int size;
+	private Boolean isDescending;
 }

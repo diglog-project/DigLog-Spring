@@ -10,6 +10,6 @@ import java.util.Set;
 @Builder
 public class MemberInfoVO {
 
-    private String email;
-    private Set<Role> roles;
+	private String email;
+	private Set<Role> roles;
 }

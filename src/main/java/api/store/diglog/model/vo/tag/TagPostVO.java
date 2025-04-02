@@ -9,5 +9,5 @@ import java.util.List;
 @Builder
 public class TagPostVO {
 
-    List<String> tagNames;
+	List<String> tagNames;
 }

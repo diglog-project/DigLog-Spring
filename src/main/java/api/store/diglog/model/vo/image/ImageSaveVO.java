@@ -2,6 +2,7 @@ package api.store.diglog.model.vo.image;
 
 import lombok.Builder;
 import lombok.Getter;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
@@ -10,6 +11,6 @@ import java.util.UUID;
 @Builder
 public class ImageSaveVO {
 
-    private UUID refId;
-    private MultipartFile file;
+	private UUID refId;
+	private MultipartFile file;
 }

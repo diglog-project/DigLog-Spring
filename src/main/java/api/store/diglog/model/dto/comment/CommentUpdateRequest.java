@@ -10,7 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentUpdateRequest {
 
-    private UUID id;
-    private String content;
-    private String taggedUsername;
+	private UUID id;
+	private String content;
+	private String taggedUsername;
 }

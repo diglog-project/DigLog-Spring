@@ -8,6 +8,6 @@ import lombok.Getter;
 @Builder
 public class RenewRefreshTokenVO {
 
-    private TokenVO tokenVO;
-    private MemberInfoResponse memberInfoResponse;
+	private TokenVO tokenVO;
+	private MemberInfoResponse memberInfoResponse;
 }

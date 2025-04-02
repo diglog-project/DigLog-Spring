@@ -9,7 +9,7 @@ import lombok.Getter;
 @Builder
 public class LoginTokenVO {
 
-    private String accessToken;
-    private Cookie refreshTokenCookie;
-    private MemberInfoResponse memberInfoResponse;
+	private String accessToken;
+	private Cookie refreshTokenCookie;
+	private MemberInfoResponse memberInfoResponse;
 }

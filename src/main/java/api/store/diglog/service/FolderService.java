@@ -174,7 +174,6 @@ public class FolderService {
 	@Transactional
 	public void deleteAllBy(List<FolderDeleteRequest> folderDeleteRequests) {
 
-
 		List<UUID> folderIds = folderDeleteRequests.stream()
 			.map(FolderDeleteRequest::getFolderId)
 			.toList();

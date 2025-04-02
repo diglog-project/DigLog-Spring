@@ -10,8 +10,8 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentRequest {
 
-    private String content;
-    private UUID postId;
-    private UUID parentCommentId;
-    private String taggedUsername;
+	private String content;
+	private UUID postId;
+	private UUID parentCommentId;
+	private String taggedUsername;
 }

@@ -1,6 +1,7 @@
 package api.store.diglog.model.dto.image;
 
 import lombok.*;
+
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
@@ -10,5 +11,5 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ImageRequest {
 
-    private MultipartFile file;
+	private MultipartFile file;
 }

@@ -3,6 +3,7 @@ package api.store.diglog.controller;
 import api.store.diglog.model.dto.tag.TagResponse;
 import api.store.diglog.service.TagService;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,12 +17,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TagController {
 
-    private final TagService tagService;
+	private final TagService tagService;
 
-    @GetMapping("/{username}")
-    public ResponseEntity<List<TagResponse>> getMemberTags(@PathVariable("username") String username) {
-        List<TagResponse> tagResponses = tagService.getMemberTags(username);
+	@GetMapping("/{username}")
+	public ResponseEntity<List<TagResponse>> getMemberTags(@PathVariable("username") String username) {
+		List<TagResponse> tagResponses = tagService.getMemberTags(username);
 
-        return ResponseEntity.ok().body(tagResponses);
-    }
+		return ResponseEntity.ok().body(tagResponses);
+	}
 }

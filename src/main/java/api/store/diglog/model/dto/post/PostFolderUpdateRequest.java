@@ -11,6 +11,6 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostFolderUpdateRequest {
 
-    private List<UUID> postIds;
-    private UUID folderId;
+	private List<UUID> postIds;
+	private UUID folderId;
 }
