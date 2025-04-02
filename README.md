@@ -1,4 +1,4 @@
-<div style="text-align: center;">
+<div align="center">
   <img width="50%" src="https://diglog.shop/logo-white.png" alt="프로젝트 로고">
 </div>
 
@@ -70,7 +70,6 @@
 
 ## ☁️ 인프라 구조
 
-아키텍처 및 네트워크 구성을 설명하는 다이어그램을 추가합니다.  
 ![Infra](https://github.com/user-attachments/assets/7ee3f338-977b-4cf8-aa1b-7749e28fe4b1)
 
 ---
