@@ -10,6 +10,6 @@ import java.util.UUID;
 @Builder
 public class ImagePostVO {
 
-    private UUID id;
-    private List<String> urls;
+	private UUID id;
+	private List<String> urls;
 }

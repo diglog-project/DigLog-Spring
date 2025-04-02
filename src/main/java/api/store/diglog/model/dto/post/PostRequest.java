@@ -11,9 +11,9 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostRequest {
 
-    private String title;
-    private String content;
-    private UUID folderId;
-    private List<String> tagNames;
-    private List<String> urls;
+	private String title;
+	private String content;
+	private UUID folderId;
+	private List<String> tagNames;
+	private List<String> urls;
 }

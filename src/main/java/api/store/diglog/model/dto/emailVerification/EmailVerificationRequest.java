@@ -8,6 +8,6 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmailVerificationRequest {
 
-    private String email;
-    private String code;
+	private String email;
+	private String code;
 }

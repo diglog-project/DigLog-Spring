@@ -10,9 +10,9 @@ import java.util.Set;
 @Builder
 public class TokenVO {
 
-    private String email;
-    private String username;
-    private Set<String> roles;
-    private String accessToken;
-    private Cookie refreshTokenCookie;
+	private String email;
+	private String username;
+	private Set<String> roles;
+	private String accessToken;
+	private Cookie refreshTokenCookie;
 }

@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Platform {
-    KAKAO("KAKAO"),
-    SERVER("SERVER");
+	KAKAO("KAKAO"),
+	SERVER("SERVER");
 
-    private final String platform;
+	private final String platform;
 }

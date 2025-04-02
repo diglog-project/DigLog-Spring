@@ -10,6 +10,7 @@ import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
 import api.store.diglog.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,98 +27,99 @@ import static api.store.diglog.common.exception.ErrorCode.*;
 @Transactional(readOnly = true)
 public class CommentService {
 
-    private final CommentRepository commentRepository;
-    private final MemberService memberService;
+	private static final int MAX_DEPTH = 2;
+	private final CommentRepository commentRepository;
+	private final MemberService memberService;
 
-    private static final int MAX_DEPTH = 2;
+	@Transactional
+	public void save(CommentRequest commentRequest) {
+		Member member = memberService.getCurrentMember();
+		Post post = Post.builder().id(commentRequest.getPostId()).build();
+		Comment parentComment = getParentComment(commentRequest.getParentCommentId());
+		Member taggedMember = getTaggedMember(commentRequest.getTaggedUsername());
 
-    @Transactional
-    public void save(CommentRequest commentRequest) {
-        Member member = memberService.getCurrentMember();
-        Post post = Post.builder().id(commentRequest.getPostId()).build();
-        Comment parentComment = getParentComment(commentRequest.getParentCommentId());
-        Member taggedMember = getTaggedMember(commentRequest.getTaggedUsername());
+		Comment comment = Comment.builder()
+			.post(post)
+			.member(member)
+			.content(commentRequest.getContent())
+			.parentComment(parentComment)
+			.taggedMember(taggedMember)
+			.build();
+		commentRepository.save(comment);
+	}
 
-        Comment comment = Comment.builder()
-                .post(post)
-                .member(member)
-                .content(commentRequest.getContent())
-                .parentComment(parentComment)
-                .taggedMember(taggedMember)
-                .build();
-        commentRepository.save(comment);
-    }
+	private Comment getParentComment(UUID parentCommentId) {
+		if (parentCommentId == null) {
+			return null;
+		}
 
-    private Comment getParentComment(UUID parentCommentId) {
-        if (parentCommentId == null) {
-            return null;
-        }
+		Comment parentComment = commentRepository.findByIdAndIsDeletedFalse(parentCommentId)
+			.orElseThrow(() -> new CustomException(COMMENT_PARENT_ID_NOT_FOUND));
 
-        Comment parentComment = commentRepository.findByIdAndIsDeletedFalse(parentCommentId)
-                .orElseThrow(() -> new CustomException(COMMENT_PARENT_ID_NOT_FOUND));
+		int parentDepth = commentRepository.getDepthByParentCommentId(parentCommentId, MAX_DEPTH);
+		if (parentDepth + 1 >= MAX_DEPTH) {
+			throw new CustomException(COMMENT_MAX_DEPTH_EXCEEDED);
+		}
 
-        int parentDepth = commentRepository.getDepthByParentCommentId(parentCommentId, MAX_DEPTH);
-        if (parentDepth + 1 >= MAX_DEPTH) {
-            throw new CustomException(COMMENT_MAX_DEPTH_EXCEEDED);
-        }
+		return parentComment;
+	}
 
-        return parentComment;
-    }
+	private Member getTaggedMember(String username) {
+		return (username != null) ? memberService.findActiveMemberByUsername(username) : null;
+	}
 
-    private Member getTaggedMember(String username) {
-        return (username != null) ? memberService.findActiveMemberByUsername(username) : null;
-    }
+	public Page<CommentResponse> getComments(CommentListRequest commentListRequest) {
+		Pageable pageable = PageRequest.of(commentListRequest.getPage(), commentListRequest.getSize(),
+			Sort.by("createdAt"));
+		Page<Comment> comments = commentRepository.findByPostIdAndParentCommentIdAndIsDeletedFalse(
+			commentListRequest.getPostId(), commentListRequest.getParentCommentId(), pageable);
 
-    public Page<CommentResponse> getComments(CommentListRequest commentListRequest) {
-        Pageable pageable = PageRequest.of(commentListRequest.getPage(), commentListRequest.getSize(), Sort.by("createdAt"));
-        Page<Comment> comments = commentRepository.findByPostIdAndParentCommentIdAndIsDeletedFalse(commentListRequest.getPostId(), commentListRequest.getParentCommentId(), pageable);
+		return comments.map(this::getCommentResponse);
+	}
 
-        return comments.map(this::getCommentResponse);
-    }
+	private CommentResponse getCommentResponse(Comment comment) {
+		return CommentResponse.builder()
+			.id(comment.getId())
+			.content(comment.getContent())
+			.member(memberService.getCommentMember(comment.getMember().getId()))
+			.isDeleted(false)
+			.taggedUsername(getTaggedUsername(comment))
+			.createdAt(comment.getCreatedAt())
+			.replyCount(commentRepository.countByParentCommentIdAndIsDeletedFalse(comment.getId()))
+			.build();
+	}
 
-    private CommentResponse getCommentResponse(Comment comment) {
-        return CommentResponse.builder()
-                .id(comment.getId())
-                .content(comment.getContent())
-                .member(memberService.getCommentMember(comment.getMember().getId()))
-                .isDeleted(false)
-                .taggedUsername(getTaggedUsername(comment))
-                .createdAt(comment.getCreatedAt())
-                .replyCount(commentRepository.countByParentCommentIdAndIsDeletedFalse(comment.getId()))
-                .build();
-    }
+	private String getTaggedUsername(Comment comment) {
+		return comment.getTaggedMember() != null
+			? memberService.findMemberById(comment.getTaggedMember().getId()).getUsername()
+			: null;
+	}
 
-    private String getTaggedUsername(Comment comment) {
-        return comment.getTaggedMember() != null
-                ? memberService.findMemberById(comment.getTaggedMember().getId()).getUsername()
-                : null;
-    }
+	@Transactional
+	public void update(CommentUpdateRequest commentUpdateRequest) {
+		Member member = memberService.getCurrentMember();
 
-    @Transactional
-    public void update(CommentUpdateRequest commentUpdateRequest) {
-        Member member = memberService.getCurrentMember();
+		Comment comment = commentRepository.findById(commentUpdateRequest.getId())
+			.orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
 
-        Comment comment = commentRepository.findById(commentUpdateRequest.getId())
-                .orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
+		if (!comment.getMember().getId().equals(member.getId())) {
+			throw new CustomException(COMMENT_UPDATE_NO_AUTHORITY);
+		}
 
-        if (!comment.getMember().getId().equals(member.getId())) {
-            throw new CustomException(COMMENT_UPDATE_NO_AUTHORITY);
-        }
+		comment.updateContent(commentUpdateRequest.getContent());
+		comment.updateTaggedMember(getTaggedMember(commentUpdateRequest.getTaggedUsername()));
 
-        comment.updateContent(commentUpdateRequest.getContent());
-        comment.updateTaggedMember(getTaggedMember(commentUpdateRequest.getTaggedUsername()));
+		commentRepository.save(comment);
+	}
 
-        commentRepository.save(comment);
-    }
+	@Transactional
+	public void delete(UUID commentId) {
+		Member member = memberService.getCurrentMember();
 
-    @Transactional
-    public void delete(UUID commentId) {
-        Member member = memberService.getCurrentMember();
+		int result = commentRepository.updateIsDeletedByCommentIdAndMemberId(commentId, member.getId());
 
-        int result = commentRepository.updateIsDeletedByCommentIdAndMemberId(commentId, member.getId());
-
-        if (result <= 0) {
-            throw new CustomException(COMMENT_IS_DELETED_NO_CHANGE);
-        }
-    }
+		if (result <= 0) {
+			throw new CustomException(COMMENT_IS_DELETED_NO_CHANGE);
+		}
+	}
 }

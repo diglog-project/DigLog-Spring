@@ -8,6 +8,6 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberProfileInfoResponse {
 
-    private String username;
-    private String profileUrl;
+	private String username;
+	private String profileUrl;
 }

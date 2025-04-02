@@ -11,8 +11,8 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentListRequest {
 
-    private UUID postId;
-    private UUID parentCommentId;
-    private int page;
-    private int size;
+	private UUID postId;
+	private UUID parentCommentId;
+	private int page;
+	private int size;
 }

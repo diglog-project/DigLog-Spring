@@ -8,5 +8,5 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberUsernameRequest {
 
-    private String username;
+	private String username;
 }

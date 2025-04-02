@@ -8,5 +8,5 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class LogoutRequest {
 
-    private String email;
+	private String email;
 }
