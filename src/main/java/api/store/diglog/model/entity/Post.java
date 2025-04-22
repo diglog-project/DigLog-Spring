@@ -67,4 +67,8 @@ public class Post {
 	public void updateFolder(Folder folder) {
 		this.folder = folder;
 	}
+
+	public void softDelete() {
+		this.isDeleted = true;
+	}
 }

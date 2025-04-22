@@ -68,4 +68,8 @@ public class Comment {
 	public void updateTaggedMember(Member taggedMember) {
 		this.taggedMember = taggedMember;
 	}
+
+	public void softDelete() {
+		this.isDeleted = true;
+	}
 }

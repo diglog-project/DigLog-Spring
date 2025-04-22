@@ -4,7 +4,6 @@ import api.store.diglog.model.entity.Image;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -16,9 +15,7 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
 
 	List<Image> findByRefId(UUID refId);
 
-	@Modifying
-	@Query("DELETE FROM Image i WHERE i.refId = :refId AND i.url IN :urls")
-	void deleteAllByRefIdAndUrls(@Param("refId") UUID refId, @Param("urls") List<String> urls);
+	void deleteAllByRefIdAndUrlIn(@Param("refId") UUID refId, @Param("urls") List<String> urls);
 
 	@Modifying
 	List<Image> deleteAllByRefId(UUID refId);
