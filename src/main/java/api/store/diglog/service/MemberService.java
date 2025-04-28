@@ -91,7 +91,10 @@ public class MemberService {
 	@Transactional
 	public void updateUsername(MemberUsernameRequest memberUsernameRequest) {
 		String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
-		memberRepository.updateUsername(memberUsernameRequest.getUsername(), email);
+		Member member = memberRepository.findByEmail(email)
+				.orElseThrow();
+
+		member.updateUsername(memberUsernameRequest.getUsername());
 	}
 
 	public MemberProfileResponse getProfile() {

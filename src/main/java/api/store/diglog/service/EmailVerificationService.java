@@ -95,7 +95,7 @@ public class EmailVerificationService {
 			throw new CustomException(SIGNUP_CODE_EXPIRED);
 		}
 
-		emailVerificationRepository.updateVerifiedTrue(email);
+		emailVerification.verify();
 	}
 
 	@Transactional
