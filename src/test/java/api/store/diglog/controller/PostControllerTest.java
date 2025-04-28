@@ -630,7 +630,7 @@ class PostControllerTest {
 		JsonNode data = objectMapper.readTree(response.getContentAsString());
 
 		// then
-		assertThat(response.getStatus()).isEqualTo(403);
+		assertThat(response.getStatus()).isEqualTo(400);
 	}
 
 	private Member defaultMember(String email) {

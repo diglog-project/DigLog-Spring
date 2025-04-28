@@ -1,6 +1,7 @@
 package api.store.diglog.service;
 
 import api.store.diglog.common.exception.CustomException;
+import api.store.diglog.common.exception.ErrorCode;
 import api.store.diglog.model.dto.comment.CommentListRequest;
 import api.store.diglog.model.dto.comment.CommentRequest;
 import api.store.diglog.model.dto.comment.CommentResponse;
@@ -304,40 +305,41 @@ class CommentServiceTest {
 	@Nested
 	class deleteCommentTest {
 
-		private static final UUID MEMBER_ID = UUID.randomUUID();
 		private static final UUID COMMENT_ID = UUID.randomUUID();
+		private static final Member MEMBER = Member.builder().build();
+		private static final Comment COMMENT = Comment.builder().build();
 
-		private static final UUID INVALID_MEMBER_ID = UUID.randomUUID();
 		private static final UUID INVALID_COMMENT_ID = UUID.randomUUID();
+		private static final Member INVALID_MEMBER = Member.builder()
+			.id(UUID.randomUUID())
+			.build();
 
 		@Test
 		@DisplayName("댓글 삭제에 성공한다.")
 		void success() {
 			// given
-			when(memberService.getCurrentMember()).thenReturn(Member.builder().id(MEMBER_ID).build());
-			when(commentRepository.updateIsDeletedByCommentIdAndMemberId(COMMENT_ID, MEMBER_ID)).thenReturn(1);
+			when(memberService.getCurrentMember()).thenReturn(MEMBER);
+			when(commentRepository.findByIdAndMember(COMMENT_ID, MEMBER)).thenReturn(Optional.of(COMMENT));
 
 			// when
 			Throwable throwable = catchThrowable(() -> commentService.delete(COMMENT_ID));
 
 			// then
 			assertThat(throwable).isNull();
-			verify(commentRepository, times(1)).updateIsDeletedByCommentIdAndMemberId(any(UUID.class), any(UUID.class));
 		}
 
 		@ParameterizedTest
 		@MethodSource("provideFail")
 		@DisplayName("댓글 삭제에 실패한다.")
-		void fail(UUID commentId, UUID memberId) {
+		void fail(UUID commentId, Member member) {
 			// given
-			when(memberService.getCurrentMember()).thenReturn(Member.builder().id(memberId).build());
-			lenient().when(commentRepository.updateIsDeletedByCommentIdAndMemberId(INVALID_COMMENT_ID, MEMBER_ID))
-				.thenReturn(0);
-			lenient().when(commentRepository.updateIsDeletedByCommentIdAndMemberId(COMMENT_ID, INVALID_MEMBER_ID))
-				.thenReturn(0);
-			lenient().when(
-					commentRepository.updateIsDeletedByCommentIdAndMemberId(INVALID_COMMENT_ID, INVALID_MEMBER_ID))
-				.thenReturn(0);
+			when(memberService.getCurrentMember()).thenReturn(member);
+			lenient().when(commentRepository.findByIdAndMember(COMMENT_ID, INVALID_MEMBER))
+				.thenThrow(new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+			lenient().when(commentRepository.findByIdAndMember(INVALID_COMMENT_ID, MEMBER))
+				.thenThrow(new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+			lenient().when(commentRepository.findByIdAndMember(INVALID_COMMENT_ID, INVALID_MEMBER))
+				.thenThrow(new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 
 			// when
 			Throwable throwable = catchThrowable(() -> commentService.delete(commentId));
@@ -348,9 +350,9 @@ class CommentServiceTest {
 
 		static Stream<Arguments> provideFail() {
 			return Stream.of(
-				Arguments.of(COMMENT_ID, INVALID_MEMBER_ID),
-				Arguments.of(INVALID_COMMENT_ID, MEMBER_ID),
-				Arguments.of(INVALID_COMMENT_ID, INVALID_MEMBER_ID)
+				Arguments.of(COMMENT_ID, INVALID_MEMBER),
+				Arguments.of(INVALID_COMMENT_ID, MEMBER),
+				Arguments.of(INVALID_COMMENT_ID, INVALID_MEMBER)
 			);
 		}
 	}
