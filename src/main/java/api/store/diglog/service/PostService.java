@@ -1,8 +1,33 @@
 package api.store.diglog.service;
 
+import static api.store.diglog.common.exception.ErrorCode.*;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.constant.SearchOption;
-import api.store.diglog.model.dto.post.*;
+import api.store.diglog.model.dto.post.PostFolderUpdateRequest;
+import api.store.diglog.model.dto.post.PostListMemberRequest;
+import api.store.diglog.model.dto.post.PostListMemberTagRequest;
+import api.store.diglog.model.dto.post.PostListSearchRequest;
+import api.store.diglog.model.dto.post.PostRequest;
+import api.store.diglog.model.dto.post.PostResponse;
+import api.store.diglog.model.dto.post.PostUpdateRequest;
+import api.store.diglog.model.dto.post.PostViewIncrementRequest;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
@@ -11,19 +36,6 @@ import api.store.diglog.model.vo.image.ImagePostVO;
 import api.store.diglog.model.vo.tag.TagPostVO;
 import api.store.diglog.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import static api.store.diglog.common.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +47,8 @@ public class PostService {
 	private final ImageService imageService;
 	private final TagService tagService;
 	private final FolderService folderService;
+	private final RedisTemplate<String, String> redisTemplate;
+	private final RedissonClient redissonClient;
 
 	@Transactional
 	public void save(PostRequest postRequest) {
@@ -197,4 +211,52 @@ public class PostService {
 			throw new CustomException(POST_DELETE_FAILED);
 		}
 	}
+
+	public void increaseView(PostViewIncrementRequest postViewIncrementRequest, String userIpAddress) {
+
+		UUID postId = postViewIncrementRequest.getPostId();
+
+		String redisKey = "post:view:" + postId.toString() + ":" + userIpAddress;
+		Boolean isFirstView = redisTemplate.opsForValue().setIfAbsent(redisKey, "true", Duration.ofHours(24));
+
+		if (Boolean.FALSE.equals(isFirstView)) {
+			return;
+		}
+
+		redisTemplate.opsForSet().add("post:view:dirtySet", postId.toString());
+
+		String countKey = "post:view:count:" + postId;
+		loadPostViewIntoRedis(countKey, postId);
+		redisTemplate.opsForValue().increment(countKey);
+
+	}
+
+	private void loadPostViewIntoRedis(String countKey, UUID postId) {
+		if (!redisTemplate.hasKey(countKey)) {
+			RLock viewCountLock = redissonClient.getLock(countKey);
+			boolean isLocked = false;
+
+			try {
+				isLocked = viewCountLock.tryLock(3, 1, TimeUnit.SECONDS);
+				if (isLocked) {
+
+					if (!redisTemplate.hasKey(countKey)) {
+						Post post = postRepository.findById(postId)
+							.orElseThrow(() -> new CustomException(POST_NOT_FOUND));
+						redisTemplate.opsForValue().set(countKey, String.valueOf(post.getViewCount()));
+					}
+				}
+
+			} catch (InterruptedException e) {
+				throw new IllegalStateException("redis error");
+
+			} finally {
+				if (isLocked && viewCountLock.isHeldByCurrentThread()) {
+					viewCountLock.unlock();
+				}
+			}
+		}
+
+	}
+
 }
