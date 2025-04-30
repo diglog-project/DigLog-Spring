@@ -5,6 +5,7 @@ import static api.store.diglog.common.exception.ErrorCode.*;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -15,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -256,6 +258,33 @@ public class PostService {
 				}
 			}
 		}
+
+	}
+
+	@Transactional
+	@Scheduled(fixedDelay = 300_000)
+	public void syncPostViewCountToDb() {
+
+		Set<String> postIds = redisTemplate.opsForSet().members("post:view:dirtySet");
+
+		List<UUID> ids = postIds.stream()
+			.map(UUID::fromString)
+			.toList();
+
+		List<Post> posts = postRepository.findAllById(ids);
+		posts.forEach(post -> {
+			String countKey = "post:view:count:" + post.getId();
+
+			String viewCountStr = redisTemplate.opsForValue().get(countKey);
+			if (viewCountStr == null) {
+				return;
+			}
+
+			long viewCount = Long.parseLong(viewCountStr);
+			post.updateViewCount(viewCount);
+
+			redisTemplate.opsForSet().remove("post:view:dirtySet", post.getId().toString());
+		});
 
 	}
 
