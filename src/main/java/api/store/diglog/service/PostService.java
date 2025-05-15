@@ -16,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -233,15 +232,42 @@ public class PostService {
 
 	}
 
+	@Transactional
+	public void syncPostViewCountToDb() {
+
+		Set<String> postIds = redisTemplate.opsForSet().members("post:view:dirtySet");
+		List<UUID> ids = postIds.stream()
+			.map(UUID::fromString)
+			.toList();
+
+		List<Post> posts = postRepository.findAllById(ids);
+		posts.forEach(post -> {
+			String countKey = "post:view:count:" + post.getId();
+
+			String viewCountStr = redisTemplate.opsForValue().get(countKey);
+			if (viewCountStr == null) {
+				return;
+			}
+
+			long viewCount = Long.parseLong(viewCountStr);
+			post.updateViewCount(viewCount);
+		});
+
+		postIds.forEach(postId ->
+			redisTemplate.opsForSet().remove("post:view:dirtySet", postId)
+		);
+
+	}
+
 	private void loadPostViewIntoRedis(String countKey, UUID postId) {
 		if (!redisTemplate.hasKey(countKey)) {
-			RLock viewCountLock = redissonClient.getLock(countKey);
+			RLock viewCountLock = redissonClient.getLock(countKey + ":lock");
 			boolean isLocked = false;
 
 			try {
 				isLocked = viewCountLock.tryLock(3, 1, TimeUnit.SECONDS);
-				if (isLocked) {
 
+				if (isLocked) {
 					if (!redisTemplate.hasKey(countKey)) {
 						Post post = postRepository.findById(postId)
 							.orElseThrow(() -> new CustomException(POST_NOT_FOUND));
@@ -259,33 +285,6 @@ public class PostService {
 			}
 		}
 
+		redisTemplate.expire(countKey, Duration.ofHours(24));
 	}
-
-	@Transactional
-	@Scheduled(fixedDelay = 300_000)
-	public void syncPostViewCountToDb() {
-
-		Set<String> postIds = redisTemplate.opsForSet().members("post:view:dirtySet");
-
-		List<UUID> ids = postIds.stream()
-			.map(UUID::fromString)
-			.toList();
-
-		List<Post> posts = postRepository.findAllById(ids);
-		posts.forEach(post -> {
-			String countKey = "post:view:count:" + post.getId();
-
-			String viewCountStr = redisTemplate.opsForValue().get(countKey);
-			if (viewCountStr == null) {
-				return;
-			}
-
-			long viewCount = Long.parseLong(viewCountStr);
-			post.updateViewCount(viewCount);
-
-			redisTemplate.opsForSet().remove("post:view:dirtySet", post.getId().toString());
-		});
-
-	}
-
 }
