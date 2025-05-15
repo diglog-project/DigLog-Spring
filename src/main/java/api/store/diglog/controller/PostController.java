@@ -22,6 +22,7 @@ import api.store.diglog.model.dto.post.PostRequest;
 import api.store.diglog.model.dto.post.PostResponse;
 import api.store.diglog.model.dto.post.PostUpdateRequest;
 import api.store.diglog.model.dto.post.PostViewIncrementRequest;
+import api.store.diglog.model.dto.post.PostViewResponse;
 import api.store.diglog.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -110,7 +111,13 @@ public class PostController {
 			clientIp = httpServletRequest.getRemoteAddr();
 		}
 
-		postService.increaseView(postViewIncrementRequest,clientIp);
+		postService.increaseView(postViewIncrementRequest, clientIp);
 		return ResponseEntity.noContent().build();
+	}
+
+	@GetMapping("/view/{id}")
+	public ResponseEntity<PostViewResponse> getPostView(@PathVariable(value = "id") UUID id) {
+		PostViewResponse postViewResponse = postService.getViewCount(id);
+		return ResponseEntity.ok().body(postViewResponse);
 	}
 }

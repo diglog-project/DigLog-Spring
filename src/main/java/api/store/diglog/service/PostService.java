@@ -29,6 +29,7 @@ import api.store.diglog.model.dto.post.PostRequest;
 import api.store.diglog.model.dto.post.PostResponse;
 import api.store.diglog.model.dto.post.PostUpdateRequest;
 import api.store.diglog.model.dto.post.PostViewIncrementRequest;
+import api.store.diglog.model.dto.post.PostViewResponse;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
@@ -257,6 +258,18 @@ public class PostService {
 			redisTemplate.opsForSet().remove("post:view:dirtySet", postId)
 		);
 
+	}
+
+	public PostViewResponse getViewCount(UUID id) {
+
+		String countKey = "post:view:count:" + id;
+		loadPostViewIntoRedis(countKey, id);
+
+		String viewCount = redisTemplate.opsForValue().get(countKey);
+		return PostViewResponse.builder()
+			.postId(id)
+			.viewCount(Long.parseLong(viewCount))
+			.build();
 	}
 
 	private void loadPostViewIntoRedis(String countKey, UUID postId) {
