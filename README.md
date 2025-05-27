@@ -1,8 +1,9 @@
 <div align="center">
-  <img width="50%" src="https://diglog.shop/logo-white.png" alt="프로젝트 로고">
+  <img width="50%" src="https://github.com/user-attachments/assets/86472360-033a-4ee0-a537-a0ab500249a3" alt="프로젝트 로고">
 </div>
 
 # DigLog
+
 
 > 개발 블로그 사이드 프로젝트
 
@@ -64,7 +65,6 @@
 ## 📌 UML
 
 아키텍처, 시퀀스 다이어그램 등 UML을 여기에 삽입합니다.  
-![UML](uml_이미지_주소)
 
 ---
 
