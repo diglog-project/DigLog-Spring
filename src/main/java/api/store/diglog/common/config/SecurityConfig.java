@@ -1,7 +1,5 @@
 package api.store.diglog.common.config;
 
-import api.store.diglog.common.auth.*;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,6 +14,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
 
+import api.store.diglog.common.auth.CustomAccessDeniedHandler;
+import api.store.diglog.common.auth.CustomAuthenticationEntryPoint;
+import api.store.diglog.common.auth.CustomOAuth2FailureHandler;
+import api.store.diglog.common.auth.CustomOAuth2SuccessHandler;
+import api.store.diglog.common.auth.CustomOAuth2UserService;
+import api.store.diglog.common.auth.JWTFilter;
+import api.store.diglog.common.auth.JWTUtil;
 import lombok.RequiredArgsConstructor;
 
 @EnableWebSecurity
@@ -42,7 +47,7 @@ public class SecurityConfig {
 		String[] swaggerApi = {"/swagger-ui/**", "/bus/v3/api-docs/**", "/v3/api-docs/**"};
 		String[] memberApi = {"/api/member/login", "/api/member/logout", "/api/member/refresh", "/api/member/profile/*",
 			"/api/member/profile/search/*", "/api/verify/**"};
-		String[] postGetApi = {"/api/post", "/api/post/*", "/api/post/member/tag"};
+		String[] postGetApi = {"/api/post", "/api/post/*", "/api/post/member/tag", "/api/post/view/*"};
 		String[] commentGetApi = {"/api/comment"};
 		String[] folderGetApi = {"/api/folders/**"};
 		String[] tagGetApi = {"/api/tag/**"};
