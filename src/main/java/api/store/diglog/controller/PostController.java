@@ -23,7 +23,7 @@ import api.store.diglog.model.dto.post.PostResponse;
 import api.store.diglog.model.dto.post.PostUpdateRequest;
 import api.store.diglog.model.dto.post.PostViewIncrementRequest;
 import api.store.diglog.model.dto.post.PostViewResponse;
-import api.store.diglog.service.PostService;
+import api.store.diglog.service.post.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 

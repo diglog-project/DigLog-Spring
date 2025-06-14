@@ -3,7 +3,7 @@ package api.store.diglog.common.scheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import api.store.diglog.service.PostService;
+import api.store.diglog.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 
 @Component
