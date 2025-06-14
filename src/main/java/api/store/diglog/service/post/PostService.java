@@ -1,4 +1,4 @@
-package api.store.diglog.service;
+package api.store.diglog.service.post;
 
 import static api.store.diglog.common.exception.ErrorCode.*;
 
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.common.exception.CustomException;
+import api.store.diglog.common.util.BatchPartition;
 import api.store.diglog.model.constant.SearchOption;
 import api.store.diglog.model.dto.post.PostFolderUpdateRequest;
 import api.store.diglog.model.dto.post.PostListMemberRequest;
@@ -37,6 +38,10 @@ import api.store.diglog.model.entity.Tag;
 import api.store.diglog.model.vo.image.ImagePostVO;
 import api.store.diglog.model.vo.tag.TagPostVO;
 import api.store.diglog.repository.PostRepository;
+import api.store.diglog.service.FolderService;
+import api.store.diglog.service.ImageService;
+import api.store.diglog.service.MemberService;
+import api.store.diglog.service.TagService;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -44,11 +49,14 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class PostService {
 
+	private static final int BATCH_SIZE = 100;
+
 	private final PostRepository postRepository;
 	private final MemberService memberService;
 	private final ImageService imageService;
 	private final TagService tagService;
 	private final FolderService folderService;
+	private final PostAsyncWorker postAsyncWorker;
 	private final RedisTemplate<String, String> redisTemplate;
 	private final RedissonClient redissonClient;
 
@@ -233,30 +241,16 @@ public class PostService {
 
 	}
 
-	@Transactional
 	public void syncPostViewCountToDb() {
+		Set<String> dirtySet = redisTemplate.opsForSet().members("post:view:dirtySet");
+		if (dirtySet == null || dirtySet.isEmpty()) {
+			return;
+		}
 
-		Set<String> postIds = redisTemplate.opsForSet().members("post:view:dirtySet");
-		List<UUID> ids = postIds.stream()
-			.map(UUID::fromString)
-			.toList();
-
-		List<Post> posts = postRepository.findAllById(ids);
-		posts.forEach(post -> {
-			String countKey = "post:view:count:" + post.getId();
-
-			String viewCountStr = redisTemplate.opsForValue().get(countKey);
-			if (viewCountStr == null) {
-				return;
-			}
-
-			long viewCount = Long.parseLong(viewCountStr);
-			post.updateViewCount(viewCount);
-		});
-
-		postIds.forEach(postId ->
-			redisTemplate.opsForSet().remove("post:view:dirtySet", postId)
-		);
+		List<UUID> postIds = dirtySet.stream().map(UUID::fromString).toList();
+		BatchPartition<UUID> batchPartition = BatchPartition.of(postIds, BATCH_SIZE);
+		batchPartition.stream()
+			.forEach(postAsyncWorker::syncViewCountAllInBatch);
 
 	}
 
