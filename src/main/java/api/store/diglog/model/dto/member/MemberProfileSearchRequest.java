@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberProfileSearchRequest {
 
-    private String username;
-    private int page;
-    private int size;
+	private String username;
+	private int page;
+	private int size;
 }

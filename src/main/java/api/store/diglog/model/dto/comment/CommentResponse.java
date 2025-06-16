@@ -11,11 +11,11 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentResponse {
 
-    private UUID id;
-    private CommentMember member;
-    private String content;
-    private boolean isDeleted;
-    private String taggedUsername;
-    private LocalDateTime createdAt;
-    private int replyCount;
+	private UUID id;
+	private CommentMember member;
+	private String content;
+	private boolean isDeleted;
+	private String taggedUsername;
+	private LocalDateTime createdAt;
+	private int replyCount;
 }

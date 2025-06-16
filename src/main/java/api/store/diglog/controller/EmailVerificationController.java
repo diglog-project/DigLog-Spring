@@ -6,6 +6,7 @@ import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupReque
 import api.store.diglog.service.EmailVerificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,26 +18,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class EmailVerificationController {
 
-    private final EmailVerificationService emailVerificationService;
+	private final EmailVerificationService emailVerificationService;
 
-    @PostMapping
-    public ResponseEntity<Void> sendMail(@RequestBody @Valid EmailVerificationCodeRequest emailVerificationCodeRequest) {
-        emailVerificationService.sendMail(emailVerificationCodeRequest.getEmail());
+	@PostMapping
+	public ResponseEntity<Void> sendMail(
+		@RequestBody @Valid EmailVerificationCodeRequest emailVerificationCodeRequest) {
+		emailVerificationService.sendMail(emailVerificationCodeRequest.getEmail());
 
-        return ResponseEntity.ok().build();
-    }
+		return ResponseEntity.ok().build();
+	}
 
-    @PostMapping("/code")
-    public ResponseEntity<Void> checkCode(@RequestBody EmailVerificationRequest emailVerificationRequest) {
-        emailVerificationService.checkCode(emailVerificationRequest);
+	@PostMapping("/code")
+	public ResponseEntity<Void> checkCode(@RequestBody EmailVerificationRequest emailVerificationRequest) {
+		emailVerificationService.checkCode(emailVerificationRequest);
 
-        return ResponseEntity.ok().build();
-    }
+		return ResponseEntity.ok().build();
+	}
 
-    @PostMapping("/signup")
-    public ResponseEntity<Void> verifyAndSignup(@RequestBody @Valid EmailVerificationSignupRequest signupRequest) {
-        emailVerificationService.verifyAndSignup(signupRequest);
+	@PostMapping("/signup")
+	public ResponseEntity<Void> verifyAndSignup(@RequestBody @Valid EmailVerificationSignupRequest signupRequest) {
+		emailVerificationService.verifyAndSignup(signupRequest);
 
-        return ResponseEntity.ok().build();
-    }
+		return ResponseEntity.ok().build();
+	}
 }

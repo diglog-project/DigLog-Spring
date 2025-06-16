@@ -15,29 +15,29 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostResponse {
 
-    private UUID id;
-    private String title;
-    private String content;
-    private String username;
-    private FolderPostResponse folder;
-    private List<TagResponse> tags;
-    private LocalDateTime createdAt;
+	private UUID id;
+	private String title;
+	private String content;
+	private String username;
+	private FolderPostResponse folder;
+	private List<TagResponse> tags;
+	private LocalDateTime createdAt;
 
-    public PostResponse(Post post) {
-        this.id = post.getId();
-        this.title = post.getTitle();
-        this.content = post.getContent();
-        this.username = post.getMember().getUsername();
-        this.tags = post.getTags().stream()
-                .map(TagResponse::new)
-                .toList();
-        this.createdAt = post.getCreatedAt();
+	public PostResponse(Post post) {
+		this.id = post.getId();
+		this.title = post.getTitle();
+		this.content = post.getContent();
+		this.username = post.getMember().getUsername();
+		this.tags = post.getTags().stream()
+			.map(TagResponse::new)
+			.toList();
+		this.createdAt = post.getCreatedAt();
 
-        if (post.getFolder() != null) {
-            this.folder = FolderPostResponse.builder()
-                    .id(post.getFolder().getId())
-                    .title(post.getFolder().getTitle())
-                    .build();
-        }
-    }
+		if (post.getFolder() != null) {
+			this.folder = FolderPostResponse.builder()
+				.id(post.getFolder().getId())
+				.title(post.getFolder().getTitle())
+				.build();
+		}
+	}
 }

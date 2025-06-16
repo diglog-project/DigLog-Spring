@@ -8,5 +8,5 @@ import lombok.Getter;
 @Builder
 public class LogoutTokenVO {
 
-    private Cookie logoutCookie;
+	private Cookie logoutCookie;
 }

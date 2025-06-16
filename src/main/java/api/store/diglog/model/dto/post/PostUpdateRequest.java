@@ -15,23 +15,23 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostUpdateRequest {
 
-    private UUID id;
-    private String title;
-    private String content;
-    private UUID folderId;
-    private List<String> tagNames;
-    private List<String> urls;
+	private UUID id;
+	private String title;
+	private String content;
+	private UUID folderId;
+	private List<String> tagNames;
+	private List<String> urls;
 
-    public Post toPost(Post currentPost, Folder folder, List<Tag> tags) {
-        return Post.builder()
-                .id(id)
-                .member(currentPost.getMember())
-                .title(title)
-                .content(content)
-                .folder(folder)
-                .tags(tags)
-                .createdAt(currentPost.getCreatedAt())
-                .updatedAt(LocalDateTime.now())
-                .build();
-    }
+	public Post toPost(Post currentPost, Folder folder, List<Tag> tags) {
+		return Post.builder()
+			.id(id)
+			.member(currentPost.getMember())
+			.title(title)
+			.content(content)
+			.folder(folder)
+			.tags(tags)
+			.createdAt(currentPost.getCreatedAt())
+			.updatedAt(LocalDateTime.now())
+			.build();
+	}
 }

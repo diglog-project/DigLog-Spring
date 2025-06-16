@@ -17,6 +17,7 @@ import api.store.diglog.model.vo.login.LogoutTokenVO;
 import api.store.diglog.repository.MemberRepository;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,128 +36,132 @@ import static api.store.diglog.common.exception.ErrorCode.*;
 @Transactional(readOnly = true)
 public class MemberService {
 
-    private final MemberRepository memberRepository;
-    private final RefreshService refreshService;
-    private final ImageService imageService;
-    private final PasswordEncoder passwordEncoder;
-    private final JWTUtil jwtUtil;
+	private final MemberRepository memberRepository;
+	private final RefreshService refreshService;
+	private final ImageService imageService;
+	private final PasswordEncoder passwordEncoder;
+	private final JWTUtil jwtUtil;
 
-    // 현재 api 요청을 보낸 Member
-    public Member getCurrentMember() {
-        String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(MEMBER_EMAIL_NOT_FOUND));
-    }
+	// 현재 api 요청을 보낸 Member
+	public Member getCurrentMember() {
+		String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
+		return memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomException(MEMBER_EMAIL_NOT_FOUND));
+	}
 
-    @Transactional
-    public LoginTokenVO login(LoginRequest loginRequest) {
-        Member member = memberRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new CustomException(LOGIN_FAILED));
+	@Transactional
+	public LoginTokenVO login(LoginRequest loginRequest) {
+		Member member = memberRepository.findByEmail(loginRequest.getEmail())
+			.orElseThrow(() -> new CustomException(LOGIN_FAILED));
 
-        if (!passwordEncoder.matches(loginRequest.getPassword(), member.getPassword())) {
-            throw new CustomException(LOGIN_FAILED);
-        }
+		if (!passwordEncoder.matches(loginRequest.getPassword(), member.getPassword())) {
+			throw new CustomException(LOGIN_FAILED);
+		}
 
-        String accessToken = jwtUtil.generateAccessToken(member);
+		String accessToken = jwtUtil.generateAccessToken(member);
 
-        Cookie refreshTokenCookie = jwtUtil.generateRefreshCookie(member);
-        refreshService.save(member.getEmail(), refreshTokenCookie.getValue());
+		Cookie refreshTokenCookie = jwtUtil.generateRefreshCookie(member);
+		refreshService.save(member.getEmail(), refreshTokenCookie.getValue());
 
-        MemberInfoResponse memberInfoResponse = MemberInfoResponse.builder()
-                .status(200)
-                .email(member.getEmail())
-                .username(member.getUsername())
-                .roles(member.getRoles().stream().map(Role::getRole).collect(Collectors.toSet()))
-                .build();
+		MemberInfoResponse memberInfoResponse = MemberInfoResponse.builder()
+			.status(200)
+			.email(member.getEmail())
+			.username(member.getUsername())
+			.roles(member.getRoles().stream().map(Role::getRole).collect(Collectors.toSet()))
+			.build();
 
-        return LoginTokenVO.builder()
-                .accessToken(accessToken)
-                .refreshTokenCookie(refreshTokenCookie)
-                .memberInfoResponse(memberInfoResponse)
-                .build();
-    }
+		return LoginTokenVO.builder()
+			.accessToken(accessToken)
+			.refreshTokenCookie(refreshTokenCookie)
+			.memberInfoResponse(memberInfoResponse)
+			.build();
+	}
 
-    @Transactional
-    public LogoutTokenVO logout(LogoutRequest logoutRequest) {
+	@Transactional
+	public LogoutTokenVO logout(LogoutRequest logoutRequest) {
 
-        Cookie logoutCookie = jwtUtil.generateLogoutCookie();
-        refreshService.delete(logoutRequest.getEmail());
+		Cookie logoutCookie = jwtUtil.generateLogoutCookie();
+		refreshService.delete(logoutRequest.getEmail());
 
-        return LogoutTokenVO.builder()
-                .logoutCookie(logoutCookie)
-                .build();
-    }
+		return LogoutTokenVO.builder()
+			.logoutCookie(logoutCookie)
+			.build();
+	}
 
-    @Transactional
-    public void updateUsername(MemberUsernameRequest memberUsernameRequest) {
-        String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
-        memberRepository.updateUsername(memberUsernameRequest.getUsername(), email);
-    }
+	@Transactional
+	public void updateUsername(MemberUsernameRequest memberUsernameRequest) {
+		String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
+		Member member = memberRepository.findByEmail(email)
+				.orElseThrow();
 
-    public MemberProfileResponse getProfile() {
-        Member member = getCurrentMember();
+		member.updateUsername(memberUsernameRequest.getUsername());
+	}
 
-        return MemberProfileResponse.builder()
-                .email(member.getEmail())
-                .username(member.getUsername())
-                .profileUrl(imageService.getUrlByRefId(member.getId()).getUrl())
-                .build();
-    }
+	public MemberProfileResponse getProfile() {
+		Member member = getCurrentMember();
 
-    public MemberProfileInfoResponse getProfileByUsername(String username) {
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(MEMBER_USERNAME_NOT_FOUND));
+		return MemberProfileResponse.builder()
+			.email(member.getEmail())
+			.username(member.getUsername())
+			.profileUrl(imageService.getUrlByRefId(member.getId()).getUrl())
+			.build();
+	}
 
-        return MemberProfileInfoResponse.builder()
-                .username(member.getUsername())
-                .profileUrl(imageService.getUrlByRefId(member.getId()).getUrl())
-                .build();
-    }
+	public MemberProfileInfoResponse getProfileByUsername(String username) {
+		Member member = memberRepository.findByUsername(username)
+			.orElseThrow(() -> new CustomException(MEMBER_USERNAME_NOT_FOUND));
 
-    @Transactional
-    public ImageUrlResponse updateProfileImage(ImageRequest imageRequest) {
-        UUID refId = getCurrentMember().getId();
-        ImageSaveVO imageSaveVO = ImageSaveVO.builder()
-                .refId(refId)
-                .file(imageRequest.getFile())
-                .build();
+		return MemberProfileInfoResponse.builder()
+			.username(member.getUsername())
+			.profileUrl(imageService.getUrlByRefId(member.getId()).getUrl())
+			.build();
+	}
 
-        return imageService.uploadAndSaveImage(imageSaveVO);
-    }
+	@Transactional
+	public ImageUrlResponse updateProfileImage(ImageRequest imageRequest) {
+		UUID refId = getCurrentMember().getId();
+		ImageSaveVO imageSaveVO = ImageSaveVO.builder()
+			.refId(refId)
+			.file(imageRequest.getFile())
+			.build();
 
-    public CommentMember getCommentMember(UUID memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));
+		return imageService.uploadAndSaveImage(imageSaveVO);
+	}
 
-        return CommentMember.builder()
-                .username(member.getUsername())
-                .profileUrl(imageService.getUrlByRefId(member.getId()).getUrl())
-                .build();
-    }
+	public CommentMember getCommentMember(UUID memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));
 
-    public Member findActiveMemberByUsername(String username) {
-        return memberRepository.findByUsernameAndIsDeletedFalse(username)
-                .orElseThrow(() -> new CustomException(MEMBER_USERNAME_NOT_FOUND));
-    }
+		return CommentMember.builder()
+			.username(member.getUsername())
+			.profileUrl(imageService.getUrlByRefId(member.getId()).getUrl())
+			.build();
+	}
 
-    public Member findMemberById(UUID memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));
-    }
+	public Member findActiveMemberByUsername(String username) {
+		return memberRepository.findByUsernameAndIsDeletedFalse(username)
+			.orElseThrow(() -> new CustomException(MEMBER_USERNAME_NOT_FOUND));
+	}
 
-    public Page<MemberProfileInfoResponse> searchProfileByUsername(MemberProfileSearchRequest memberProfileSearchRequest) {
-        String username = memberProfileSearchRequest.getUsername();
-        int page = memberProfileSearchRequest.getPage();
-        int size = memberProfileSearchRequest.getSize();
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt", "id").descending());
+	public Member findMemberById(UUID memberId) {
+		return memberRepository.findById(memberId)
+			.orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));
+	}
 
-        return memberRepository.findAllByUsernameContainingIgnoreCaseAndIsDeletedFalse(username, pageable)
-                .map(member -> {
-                    String profileUrl = imageService.getUrlByRefId(member.getId()).getUrl();
-                    return MemberProfileInfoResponse.builder()
-                            .username(member.getUsername())
-                            .profileUrl(profileUrl)
-                            .build();
-                });
-    }
+	public Page<MemberProfileInfoResponse> searchProfileByUsername(
+		MemberProfileSearchRequest memberProfileSearchRequest) {
+		String username = memberProfileSearchRequest.getUsername();
+		int page = memberProfileSearchRequest.getPage();
+		int size = memberProfileSearchRequest.getSize();
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt", "id").descending());
+
+		return memberRepository.findAllByUsernameContainingIgnoreCaseAndIsDeletedFalse(username, pageable)
+			.map(member -> {
+				String profileUrl = imageService.getUrlByRefId(member.getId()).getUrl();
+				return MemberProfileInfoResponse.builder()
+					.username(member.getUsername())
+					.profileUrl(profileUrl)
+					.build();
+			});
+	}
 }

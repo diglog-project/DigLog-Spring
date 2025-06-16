@@ -10,6 +10,6 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class FolderPostResponse {
 
-    private UUID id;
-    private String title;
+	private UUID id;
+	private String title;
 }

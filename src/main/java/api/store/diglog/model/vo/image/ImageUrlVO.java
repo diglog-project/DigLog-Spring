@@ -7,5 +7,5 @@ import lombok.Getter;
 @Builder
 public class ImageUrlVO {
 
-    private String url;
+	private String url;
 }

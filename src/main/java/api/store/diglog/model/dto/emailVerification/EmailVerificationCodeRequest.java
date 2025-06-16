@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmailVerificationCodeRequest {
 
-    @NotBlank
-    @Email(message = "이메일 형식에 맞게 입력해주세요.")
-    private String email;
+	@NotBlank
+	@Email(message = "이메일 형식에 맞게 입력해주세요.")
+	private String email;
 }

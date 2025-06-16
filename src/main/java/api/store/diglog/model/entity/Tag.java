@@ -2,6 +2,7 @@ package api.store.diglog.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -17,28 +18,28 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Tag {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private UUID id;
 
-    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
-    private List<Post> posts = new ArrayList<>();
+	@ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
+	private List<Post> posts = new ArrayList<>();
 
-    @Column(unique = true)
-    private String name;
+	@Column(unique = true)
+	private String name;
 
-    @CreatedDate
-    private LocalDateTime createdAt;
+	@CreatedDate
+	private LocalDateTime createdAt;
 
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
+	@LastModifiedDate
+	private LocalDateTime updatedAt;
 
-    @Builder
-    public Tag(UUID id, String name, List<Post> posts, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
-        this.name = name;
-        this.posts = posts;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
+	@Builder
+	public Tag(UUID id, String name, List<Post> posts, LocalDateTime createdAt, LocalDateTime updatedAt) {
+		this.id = id;
+		this.name = name;
+		this.posts = posts;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+	}
 }

@@ -11,8 +11,8 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostListMemberTagRequest {
 
-    private String username;
-    private UUID tagId;
-    private int page;
-    private int size;
+	private String username;
+	private UUID tagId;
+	private int page;
+	private int size;
 }
