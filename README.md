@@ -4,46 +4,43 @@
 
 # DigLog
 
-
-> 개발 블로그 사이드 프로젝트
+> **계층형 폴더 구조**와 **태그 시스템**을 활용한 블로그 사이트
 
 ---
 
 ## 📖 목차
 
-- [📝 프로젝트 소개](#-프로젝트-소개)
-- [🔗 배포 주소](#-배포-주소)
-- [👨‍💻 팀 소개](#-팀-소개)
-- [🚀 주요 기능](#-주요-기능)
-- [📌 UML](#-uml)
-- [☁️ 인프라 구조](#-인프라-구조)
-- [🛠 기술 스택](#-기술-스택)
-- [📊 ERD](#-erd)
-- [🔑 JWT 인증](#-JWT-인증)
-- [📂 디렉토리 구조](#-디렉토리-구조)
-- [📝 문서 및 참고자료](#-문서-및-참고자료)
-
----
-
-## 📝 프로젝트 소개
-
-프로젝트의 목적과 해결하고자 하는 문제를 간략하게 설명합니다.
+- [DigLog](#diglog)
+  - [📖 목차](#-목차)
+  - [🔗 배포 및 레포지토리 주소](#-배포-및-레포지토리-주소)
+    - [배포](#배포)
+    - [Repository 주소](#repository-주소)
+  - [👨‍💻 팀 소개](#-팀-소개)
+    - [🤝 팀원 소개](#-팀원-소개)
+    - [⏳ 개발 기간](#-개발-기간)
+  - [🚀 주요 기능](#-주요-기능)
+  - [☁️ 인프라 구조 및 CI-CD](#️-인프라-구조-및-ci-cd)
+    - [Infra](#infra)
+    - [BackEnd CI-CD](#backend-ci-cd)
+  - [🛠 기술 스택](#-기술-스택)
+  - [📊 ERD](#-erd)
+  - [🔑 JWT 인증](#-jwt-인증)
+  - [📂 디렉토리 구조](#-디렉토리-구조)
+  - [📄 문서 및 참고 자료](#-문서-및-참고-자료)
 
 ---
 
 ## 🔗 배포 및 레포지토리 주소
 
+### 배포
 - [배포 URL](배포_주소)
+### Repository 주소
 - [FrontEnd Repo](https://github.com/diglog-project/DigLog-React)
 - [BackEnd Repo](https://github.com/diglog-project/DigLog-Spring)
 
 ---
 
 ## 👨‍💻 팀 소개
-
-### ⏳ 개발 기간
-
-- **2025.02 ~ **
 
 ### 🤝 팀원 소개
 
@@ -52,25 +49,49 @@
 | 김태환 | Frontend / Backend | [GitHub](https://github.com/typhoon0678) |
 | 이석원 | Backend            | [GitHub](https://github.com/frod90)      |
 
+### ⏳ 개발 기간
+
+- **2025.02 ~**
+
 ---
 
 ## 🚀 주요 기능
 
-- ✅ 기능 1: 기능 설명
-- ✅ 기능 2: 기능 설명
-- ✅ 기능 3: 기능 설명
+- ✅ 계층형 폴더 시스템 구현
+  - 최대 3단계 깊이의 계층형 구조의 폴더 구현
+  - 사용자가 한번에 폴더를 CRUD할 수 있도록 구현
+  - 폴더 CRUD 시 폴더 구조의 유효성 검증 로직 구현
+  - 폴더-게시글 1:N 구현
+
+
+- ✅ 게시글 관리 시스템
+  - AWS S3를 활용한 이미지 업로드 및 관리
+  - 게시글-태그 N:N 구현
+  - 댓글 CRUD 기능과 계층형 댓글 구조 구현
+  - 제목, 태그, 작성자 기준 검색 기능 구현
+
+
+- ✅ 개인 블로그 및 관리 페이지
+  - 폴더/태그 별 게시글 필터링
+  - 프로필 이미지, username 수정 페이지 제공
+  - 폴더, 게시글 수정 페이지 제공
+
+
+- ✅ JWT, OAuth2 로그인 구현
+  - Spring Security, OAuth, JWT를 통한 이메일, 카카오 로그인 구현
+  - accessToken을 검증하는 JWTFilter 구현
+  - refreshToken을 통한 토큰 재발급 및 토큰 화이트리스트 구현
+
 
 ---
 
-## 📌 UML
+## ☁️ 인프라 구조 및 CI-CD
 
-아키텍처, 시퀀스 다이어그램 등 UML을 여기에 삽입합니다.  
+### Infra
+![Infra](https://github.com/user-attachments/assets/79810104-8ee5-4002-8627-a03ef212807b)
 
----
-
-## ☁️ 인프라 구조
-
-![Infra](https://github.com/user-attachments/assets/7ee3f338-977b-4cf8-aa1b-7749e28fe4b1)
+### BackEnd CI-CD
+![BackEnd CI-CD](https://github.com/user-attachments/assets/2e5fcf4d-d6f5-41e1-bef0-84854830fb44)
 
 ---
 
@@ -129,7 +150,6 @@
 ┃   ┣ 📂 config
 ┃   ┣ 📂 exception
 ┃   ┣ 📂 util
-┃ ┣ 📂 controller
 ┃ ┣ 📂 model
 ┃   ┣ 📂 constant
 ┃   ┣ 📂 dto
@@ -137,6 +157,7 @@
 ┃   ┣ 📂 vo
 ┃ ┣ 📂 repository
 ┃ ┣ 📂 service
+┃ ┣ 📂 controller
 ┃ ┗ 📜 Application.java
 ```
 
@@ -144,6 +165,7 @@
 
 ## 📄 문서 및 참고 자료
 
-- 📌 [API 문서 (Swagger)](docs_주소)
-- 📌 [트러블 슈팅 기록](트러블슈팅_주소)
+- 📌 [노션](https://www.notion.so/184a3f4cb4108063805ff446cee6b6b4?source=copy_link)
+- 📌 [Swagger](Swagger_주소)
+- 📌 [트러블 슈팅](트러블슈팅_주소)
 
