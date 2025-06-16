@@ -88,10 +88,10 @@
 ## ☁️ 인프라 구조 및 CI-CD
 
 ### Infra
-![Infra](https://github.com/user-attachments/assets/79810104-8ee5-4002-8627-a03ef212807b)
+![Infra](https://github.com/user-attachments/assets/d4d69dde-09a7-437b-b3b4-db594593b368)
 
 ### BackEnd CI-CD
-![BackEnd CI-CD](https://github.com/user-attachments/assets/2e5fcf4d-d6f5-41e1-bef0-84854830fb44)
+![BackEnd CI-CD](https://github.com/user-attachments/assets/4e89fd15-a3e6-4f7d-9e2d-392232943140)
 
 ---
 
