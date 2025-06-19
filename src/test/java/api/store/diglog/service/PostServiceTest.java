@@ -3,20 +3,25 @@ package api.store.diglog.service;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +47,7 @@ import api.store.diglog.model.entity.Post;
 import api.store.diglog.repository.FolderRepository;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.PostRepository;
+import api.store.diglog.repository.PostViewBatchRepository;
 import api.store.diglog.service.post.PostService;
 
 @Testcontainers
@@ -70,6 +76,9 @@ class PostServiceTest {
 
 	@Autowired
 	private PostService postService;
+
+	@MockitoSpyBean
+	private PostViewBatchRepository postViewBatchRepository;
 
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
@@ -401,7 +410,7 @@ class PostServiceTest {
 		assertThat(response.getViewCount()).isEqualTo(post.getViewCount() + 1);
 	}
 
-	@DisplayName("동기화 시 Redis에서 조회수를 읽어와 DB에 반영하고 dirtySet을 제거한다.")
+	@DisplayName("조회수 동기화 시 Redis에서 데이터를 읽어와 DB에 반영하고, dirtySet을 초기화한다.")
 	@Test
 	void syncPostViewCountToDb() throws InterruptedException {
 		// given
@@ -432,35 +441,83 @@ class PostServiceTest {
 
 	}
 
-	@DisplayName("동기화 시 Redis에서 조회수를 읽어와 DB에 반영하고 dirtySet을 제거한다.")
-	@Test
-	void syncPostViewCountToDb_shouldFlushAndClearRedis() throws InterruptedException {
+	@DisplayName("조회수 업데이트는 배치 단위로 분할되어 비동기로 수행한다.")
+	@CsvSource({
+		"1, 1",
+		"100, 1",
+		"150, 2",
+		"250, 3",
+		"1000, 10"
+	})
+	@ParameterizedTest(name = "{0}개의 게시글은 조회수 업데이트 기능을 {1}번 호출한다")
+	void syncPostViewCountToDb_shouldDelegateToWorkerWithCorrectBatches(int totalCounts, int expectedMethodCallCount) {
 		// given
-		Post post = postRepository.save(Post.builder()
-			.member(member)
-			.title("Diglog Redis 적용기")
-			.content("Diglog 프로젝트의 Redis 적용과정")
-			.viewCount(100L)
-			.folder(folder)
-			.build());
-		UUID postId = post.getId();
+		List<Member> members = memberRepository.saveAll(
+			IntStream.range(0, totalCounts)
+				.mapToObj(i -> Member.builder()
+					.email("Frod" + i + "@gmail.com")
+					.username("Frod" + i)
+					.password("FrodPassword" + i)
+					.roles(Set.of(Role.ROLE_USER))
+					.platform(Platform.SERVER)
+					.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
+					.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
+					.build())
+				.toList()
+		);
+		List<Folder> folders = folderRepository.saveAll(
+			IntStream.range(0, totalCounts)
+				.mapToObj(i -> Folder.builder()
+					.id(UUID.randomUUID())
+					.member(members.get(i))
+					.title("diglog" + i)
+					.depth(0)
+					.orderIndex(0)
+					.parentFolder(null)
+					.build())
+				.toList()
+		);
 
-		redisTemplate.opsForValue().set("post:view:count:" + postId, "1234");
-		redisTemplate.opsForSet().add("post:view:dirtySet", postId.toString());
+		List<Post> posts = IntStream.range(0, totalCounts)
+			.mapToObj(i -> postRepository.save(Post.builder()
+				.title("title " + i)
+				.content("content")
+				.viewCount(i)
+				.member(members.get(i))
+				.folder(folders.get(i))
+				.build()))
+			.toList();
+
+		posts.forEach(post -> {
+			redisTemplate.opsForValue().set("post:view:count:" + post.getId(), String.valueOf(post.getViewCount() * 2));
+			redisTemplate.opsForSet().add("post:view:dirtySet", post.getId().toString());
+		});
 
 		// when
 		postService.syncPostViewCountToDb();
-		Thread.sleep(1000);
 
 		// then
-		Post updated = postRepository.findById(postId).orElseThrow();
-		Set<String> dirtySet = redisTemplate.opsForSet().members("post:view:dirtySet");
-
-		assertAll(
-			() -> assertThat(updated.getViewCount()).isEqualTo(1234),
-			() -> assertThat(dirtySet).doesNotContain(postId.toString())
-		);
-
+		await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+			assertAll(
+				() -> verify(postViewBatchRepository, times(expectedMethodCallCount)).bulkUpdateViewCounts(any()),
+				() -> {
+					List<Post> updatedPosts = postRepository.findAllById(
+						posts.stream()
+							.map(Post::getId)
+							.toList()
+					);
+					assertThat(updatedPosts)
+						.extracting("id", "viewCount")
+						.containsExactlyInAnyOrderElementsOf(
+							updatedPosts.stream()
+								.map(Post::getId)
+								.map(postId -> tuple(postId,
+									Long.parseLong(redisTemplate.opsForValue().get("post:view:count:" + postId))))
+								.toList()
+						);
+				}
+			);
+		});
 	}
 
 }
