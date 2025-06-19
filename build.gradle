@@ -48,6 +48,7 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation "org.testcontainers:redis"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.awaitility:awaitility:4.2.0'
 
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.session:spring-session-data-redis'
