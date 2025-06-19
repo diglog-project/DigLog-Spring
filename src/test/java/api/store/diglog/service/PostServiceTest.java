@@ -1,6 +1,7 @@
 package api.store.diglog.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.Duration;
@@ -41,6 +42,7 @@ import api.store.diglog.model.entity.Post;
 import api.store.diglog.repository.FolderRepository;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.PostRepository;
+import api.store.diglog.service.post.PostService;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -397,6 +399,68 @@ class PostServiceTest {
 
 		// then
 		assertThat(response.getViewCount()).isEqualTo(post.getViewCount() + 1);
+	}
+
+	@DisplayName("동기화 시 Redis에서 조회수를 읽어와 DB에 반영하고 dirtySet을 제거한다.")
+	@Test
+	void syncPostViewCountToDb() throws InterruptedException {
+		// given
+		Post post = postRepository.save(Post.builder()
+			.member(member)
+			.title("Diglog Redis 적용기")
+			.content("Diglog 프로젝트의 Redis 적용과정")
+			.viewCount(100L)
+			.folder(folder)
+			.build());
+		UUID postId = post.getId();
+
+		redisTemplate.opsForValue().set("post:view:count:" + postId, "1234");
+		redisTemplate.opsForSet().add("post:view:dirtySet", postId.toString());
+
+		// when
+		postService.syncPostViewCountToDb();
+		Thread.sleep(1000);
+
+		// then
+		Post updated = postRepository.findById(postId).orElseThrow();
+		Set<String> dirtySet = redisTemplate.opsForSet().members("post:view:dirtySet");
+
+		assertAll(
+			() -> assertThat(updated.getViewCount()).isEqualTo(1234),
+			() -> assertThat(dirtySet).doesNotContain(postId.toString())
+		);
+
+	}
+
+	@DisplayName("동기화 시 Redis에서 조회수를 읽어와 DB에 반영하고 dirtySet을 제거한다.")
+	@Test
+	void syncPostViewCountToDb_shouldFlushAndClearRedis() throws InterruptedException {
+		// given
+		Post post = postRepository.save(Post.builder()
+			.member(member)
+			.title("Diglog Redis 적용기")
+			.content("Diglog 프로젝트의 Redis 적용과정")
+			.viewCount(100L)
+			.folder(folder)
+			.build());
+		UUID postId = post.getId();
+
+		redisTemplate.opsForValue().set("post:view:count:" + postId, "1234");
+		redisTemplate.opsForSet().add("post:view:dirtySet", postId.toString());
+
+		// when
+		postService.syncPostViewCountToDb();
+		Thread.sleep(1000);
+
+		// then
+		Post updated = postRepository.findById(postId).orElseThrow();
+		Set<String> dirtySet = redisTemplate.opsForSet().members("post:view:dirtySet");
+
+		assertAll(
+			() -> assertThat(updated.getViewCount()).isEqualTo(1234),
+			() -> assertThat(dirtySet).doesNotContain(postId.toString())
+		);
+
 	}
 
 }
