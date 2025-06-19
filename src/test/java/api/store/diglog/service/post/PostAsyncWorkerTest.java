@@ -15,6 +15,7 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -108,6 +109,7 @@ class PostAsyncWorkerTest {
 		redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
 	}
 
+	@DisplayName("게시글의 조회수의 업데이트와 Redis의 조회수 관련 DirtySet을 초기화를 비동기로 처리한다.")
 	@Test
 	void syncViewCountAllInBatch() {
 
