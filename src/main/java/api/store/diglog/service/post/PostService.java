@@ -7,10 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -58,7 +55,7 @@ public class PostService {
 	private final FolderService folderService;
 	private final PostAsyncWorker postAsyncWorker;
 	private final RedisTemplate<String, String> redisTemplate;
-	private final RedissonClient redissonClient;
+	private final RedisPostViewLoader redisPostViewLoader;
 
 	@Transactional
 	public void save(PostRequest postRequest) {
@@ -227,7 +224,7 @@ public class PostService {
 		UUID postId = postViewIncrementRequest.getPostId();
 
 		String countKey = "post:view:count:" + postId;
-		loadPostViewIntoRedis(countKey, postId);
+		redisPostViewLoader.load(countKey, postId);
 
 		String redisKey = "post:view:" + postId.toString() + ":" + userIpAddress;
 		Boolean isFirstView = redisTemplate.opsForValue().setIfAbsent(redisKey, "true", Duration.ofHours(24));
@@ -246,7 +243,7 @@ public class PostService {
 	public PostViewResponse getViewCount(UUID id) {
 
 		String countKey = "post:view:count:" + id;
-		loadPostViewIntoRedis(countKey, id);
+		redisPostViewLoader.load(countKey, id);
 
 		String viewCount = redisTemplate.opsForValue().get(countKey);
 		validateRedisViewCount(viewCount);
@@ -267,39 +264,6 @@ public class PostService {
 		batchPartition.stream()
 			.forEach(postAsyncWorker::syncViewCountAllInBatch);
 
-	}
-
-	private void loadPostViewIntoRedis(String countKey, UUID postId) {
-		if (doesNotExistViewCountInRedis(countKey)) {
-			RLock viewCountLock = redissonClient.getLock(countKey + ":lock");
-			boolean isLocked = false;
-
-			try {
-				isLocked = viewCountLock.tryLock(3, 1, TimeUnit.SECONDS);
-
-				if (isLocked) {
-					if (doesNotExistViewCountInRedis(countKey)) {
-						Post post = postRepository.findById(postId)
-							.orElseThrow(() -> new CustomException(POST_NOT_FOUND));
-						redisTemplate.opsForValue().set(countKey, String.valueOf(post.getViewCount()));
-					}
-				}
-
-			} catch (InterruptedException e) {
-				throw new CustomException(REDIS_UNAVAILABLE);
-
-			} finally {
-				if (isLocked && viewCountLock.isHeldByCurrentThread()) {
-					viewCountLock.unlock();
-				}
-			}
-		}
-
-		redisTemplate.expire(countKey, Duration.ofHours(24));
-	}
-
-	private boolean doesNotExistViewCountInRedis(String countKey) {
-		return !redisTemplate.hasKey(countKey);
 	}
 
 	private void validateRedisViewCount(String redisViewCount) {
