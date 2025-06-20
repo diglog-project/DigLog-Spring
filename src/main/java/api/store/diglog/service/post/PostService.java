@@ -226,6 +226,9 @@ public class PostService {
 
 		UUID postId = postViewIncrementRequest.getPostId();
 
+		String countKey = "post:view:count:" + postId;
+		loadPostViewIntoRedis(countKey, postId);
+
 		String redisKey = "post:view:" + postId.toString() + ":" + userIpAddress;
 		Boolean isFirstView = redisTemplate.opsForValue().setIfAbsent(redisKey, "true", Duration.ofHours(24));
 
@@ -233,12 +236,24 @@ public class PostService {
 			return;
 		}
 
+		String redisViewCount = redisTemplate.opsForValue().get(countKey);
+		validateRedisViewCount(redisViewCount);
+		redisTemplate.opsForValue().increment(countKey);
 		redisTemplate.opsForSet().add("post:view:dirtySet", postId.toString());
 
-		String countKey = "post:view:count:" + postId;
-		loadPostViewIntoRedis(countKey, postId);
-		redisTemplate.opsForValue().increment(countKey);
+	}
 
+	public PostViewResponse getViewCount(UUID id) {
+
+		String countKey = "post:view:count:" + id;
+		loadPostViewIntoRedis(countKey, id);
+
+		String viewCount = redisTemplate.opsForValue().get(countKey);
+		validateRedisViewCount(viewCount);
+		return PostViewResponse.builder()
+			.postId(id)
+			.viewCount(Long.parseLong(viewCount))
+			.build();
 	}
 
 	public void syncPostViewCountToDb() {
@@ -254,20 +269,8 @@ public class PostService {
 
 	}
 
-	public PostViewResponse getViewCount(UUID id) {
-
-		String countKey = "post:view:count:" + id;
-		loadPostViewIntoRedis(countKey, id);
-
-		String viewCount = redisTemplate.opsForValue().get(countKey);
-		return PostViewResponse.builder()
-			.postId(id)
-			.viewCount(Long.parseLong(viewCount))
-			.build();
-	}
-
 	private void loadPostViewIntoRedis(String countKey, UUID postId) {
-		if (!redisTemplate.hasKey(countKey)) {
+		if (doesNotExistViewCountInRedis(countKey)) {
 			RLock viewCountLock = redissonClient.getLock(countKey + ":lock");
 			boolean isLocked = false;
 
@@ -275,7 +278,7 @@ public class PostService {
 				isLocked = viewCountLock.tryLock(3, 1, TimeUnit.SECONDS);
 
 				if (isLocked) {
-					if (!redisTemplate.hasKey(countKey)) {
+					if (doesNotExistViewCountInRedis(countKey)) {
 						Post post = postRepository.findById(postId)
 							.orElseThrow(() -> new CustomException(POST_NOT_FOUND));
 						redisTemplate.opsForValue().set(countKey, String.valueOf(post.getViewCount()));
@@ -283,7 +286,7 @@ public class PostService {
 				}
 
 			} catch (InterruptedException e) {
-				throw new IllegalStateException("redis error");
+				throw new CustomException(REDIS_UNAVAILABLE);
 
 			} finally {
 				if (isLocked && viewCountLock.isHeldByCurrentThread()) {
@@ -293,5 +296,22 @@ public class PostService {
 		}
 
 		redisTemplate.expire(countKey, Duration.ofHours(24));
+	}
+
+	private boolean doesNotExistViewCountInRedis(String countKey) {
+		return !redisTemplate.hasKey(countKey);
+	}
+
+	private void validateRedisViewCount(String redisViewCount) {
+		if (redisViewCount == null) {
+			throw new CustomException(REDIS_VIEW_COUNT_VALUE_MISSING);
+		}
+		try {
+			if (Long.parseLong(redisViewCount) <= 0) {
+				throw new CustomException(INVALID_REDIS_VIEW_COUNT_VALUE);
+			}
+		} catch (NumberFormatException e) {
+			throw new CustomException(INVALID_REDIS_VIEW_COUNT_VALUE);
+		}
 	}
 }
