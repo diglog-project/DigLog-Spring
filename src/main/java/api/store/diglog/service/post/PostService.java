@@ -47,6 +47,14 @@ import lombok.RequiredArgsConstructor;
 public class PostService {
 
 	private static final int BATCH_SIZE = 100;
+	private static final int DEFAULT_VIEW_COUNT = 1;
+	private static final String REDIS_KEY_DELIMITER = ":";
+	private static final String REDIS_KEY_PREFIX_POST_VIEW =
+		"post" + REDIS_KEY_DELIMITER + "view" + REDIS_KEY_DELIMITER;
+	private static final String REDIS_KEY_PREFIX_VIEW_COUNT =
+		REDIS_KEY_PREFIX_POST_VIEW + "count" + REDIS_KEY_DELIMITER;
+	private static final String REDIS_KEY_VIEW_COUNT_DIRTY_SET = REDIS_KEY_PREFIX_POST_VIEW + "dirtySet";
+	private static final int DAILY_TTL_HOURS = 24;
 
 	private final PostRepository postRepository;
 	private final MemberService memberService;
@@ -223,11 +231,12 @@ public class PostService {
 
 		UUID postId = postViewIncrementRequest.getPostId();
 
-		String countKey = "post:view:count:" + postId;
+		String countKey = REDIS_KEY_PREFIX_VIEW_COUNT + postId;
 		redisPostViewLoader.load(countKey, postId);
 
-		String redisKey = "post:view:" + postId.toString() + ":" + userIpAddress;
-		Boolean isFirstView = redisTemplate.opsForValue().setIfAbsent(redisKey, "true", Duration.ofHours(24));
+		String redisKey = REDIS_KEY_PREFIX_POST_VIEW + postId.toString() + REDIS_KEY_DELIMITER + userIpAddress;
+		Boolean isFirstView = redisTemplate.opsForValue()
+			.setIfAbsent(redisKey, "true", Duration.ofHours(DAILY_TTL_HOURS));
 
 		if (Boolean.FALSE.equals(isFirstView)) {
 			return;
@@ -236,13 +245,13 @@ public class PostService {
 		String redisViewCount = redisTemplate.opsForValue().get(countKey);
 		validateRedisViewCount(redisViewCount);
 		redisTemplate.opsForValue().increment(countKey);
-		redisTemplate.opsForSet().add("post:view:dirtySet", postId.toString());
+		redisTemplate.opsForSet().add(REDIS_KEY_VIEW_COUNT_DIRTY_SET, postId.toString());
 
 	}
 
 	public PostViewResponse getViewCount(UUID id) {
 
-		String countKey = "post:view:count:" + id;
+		String countKey = REDIS_KEY_PREFIX_VIEW_COUNT + id;
 		redisPostViewLoader.load(countKey, id);
 
 		String viewCount = redisTemplate.opsForValue().get(countKey);
@@ -254,7 +263,7 @@ public class PostService {
 	}
 
 	public void syncPostViewCountToDb() {
-		Set<String> dirtySet = redisTemplate.opsForSet().members("post:view:dirtySet");
+		Set<String> dirtySet = redisTemplate.opsForSet().members(REDIS_KEY_VIEW_COUNT_DIRTY_SET);
 		if (dirtySet == null || dirtySet.isEmpty()) {
 			return;
 		}
@@ -271,7 +280,7 @@ public class PostService {
 			throw new CustomException(REDIS_VIEW_COUNT_VALUE_MISSING);
 		}
 		try {
-			if (Long.parseLong(redisViewCount) <= 0) {
+			if (Long.parseLong(redisViewCount) < DEFAULT_VIEW_COUNT) {
 				throw new CustomException(INVALID_REDIS_VIEW_COUNT_VALUE);
 			}
 		} catch (NumberFormatException e) {
