@@ -21,12 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
@@ -36,21 +30,11 @@ import api.store.diglog.model.entity.Post;
 import api.store.diglog.repository.FolderRepository;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.PostRepository;
+import api.store.diglog.supporter.RedisTestSupporter;
 
-@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-class PostAsyncWorkerTest {
-	@Container
-	static GenericContainer<?> redisContainer = new GenericContainer<>("redis:7.2")
-		.withExposedPorts(6379)
-		.waitingFor(Wait.forListeningPort());
-
-	@DynamicPropertySource
-	static void overrideRedisProperties(DynamicPropertyRegistry registry) {
-		registry.add("spring.redis.host", redisContainer::getHost);
-		registry.add("spring.redis.port", () -> redisContainer.getMappedPort(6379));
-	}
+class PostAsyncWorkerTest extends RedisTestSupporter {
 
 	@Autowired
 	private PostAsyncWorker postAsyncWorker;

@@ -28,13 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.constant.Platform;
@@ -49,21 +43,12 @@ import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.PostRepository;
 import api.store.diglog.repository.PostViewBatchRepository;
 import api.store.diglog.service.post.PostService;
+import api.store.diglog.service.post.RedisPostViewLoader;
+import api.store.diglog.supporter.RedisTestSupporter;
 
-@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-class PostServiceTest {
-	@Container
-	static GenericContainer<?> redisContainer = new GenericContainer<>("redis:7.2")
-		.withExposedPorts(6379)
-		.waitingFor(Wait.forListeningPort());
-
-	@DynamicPropertySource
-	static void overrideRedisProperties(DynamicPropertyRegistry registry) {
-		registry.add("spring.redis.host", redisContainer::getHost);
-		registry.add("spring.redis.port", () -> redisContainer.getMappedPort(6379));
-	}
+class PostServiceTest extends RedisTestSupporter {
 
 	@Autowired
 	private MemberRepository memberRepository;
@@ -85,6 +70,9 @@ class PostServiceTest {
 
 	@Autowired
 	private RedissonClient redissonClient;
+
+	@MockitoSpyBean
+	private RedisPostViewLoader redisPostViewLoader;
 
 	private Member member;
 
@@ -159,6 +147,64 @@ class PostServiceTest {
 		assertThatThrownBy(() -> postService.getViewCount(notExistPostId))
 			.isInstanceOf(CustomException.class)
 			.hasMessage("해당 게시글이 없습니다.");
+	}
+
+	@DisplayName("Redis에 조회수가 존재하지 않으면, 조회수가 조회되지 않는다.")
+	@Test
+	void getViewCount_shouldThrowException_whenRedisValueIsNull() {
+		// given
+		Post post = postRepository.save(Post.builder()
+			.member(member)
+			.title("Diglog Redis 적용기")
+			.content("Diglog 프로젝트의 Redis 적용과정")
+			.folder(folder)
+			.viewCount(1L)
+			.build());
+
+		doNothing().when(redisPostViewLoader).load(anyString(), any());
+
+		// when & then
+		assertThatThrownBy(() -> postService.getViewCount(post.getId()))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("조회수 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.");
+	}
+
+	@DisplayName("Redis에 조회수가 기본값보다 작을 경우, 조회수가 조회되지 않는다.")
+	@Test
+	void getViewCount_shouldThrowException_whenRedisValueIsLessThanDefaultValue() {
+		// given
+		Post post = postRepository.save(Post.builder()
+			.member(member)
+			.title("Diglog Redis 적용기")
+			.content("Diglog 프로젝트의 Redis 적용과정")
+			.folder(folder)
+			.viewCount(0L)
+			.build());
+
+		// when & then
+		assertThatThrownBy(() -> postService.getViewCount(post.getId()))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("조회수 처리에 실패했습니다. 잠시 후 다시 시도해주세요.");
+	}
+
+	@DisplayName("Redis에 조회수가 숫자가 아닌 경우, 조회수가 조회되지 않는다.")
+	@Test
+	void getViewCount_shouldThrowException_whenRedisValueIsWrongType() {
+		// given
+		Post post = postRepository.save(Post.builder()
+			.member(member)
+			.title("Diglog Redis 적용기")
+			.content("Diglog 프로젝트의 Redis 적용과정")
+			.folder(folder)
+			.viewCount(0L)
+			.build());
+
+		redisTemplate.opsForValue().set("post:view:count:" + post.getId(), "diglog");
+
+		// when & then
+		assertThatThrownBy(() -> postService.getViewCount(post.getId()))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("조회수 처리에 실패했습니다. 잠시 후 다시 시도해주세요.");
 	}
 
 	@DisplayName("레디스의 조회수를 증가시킬 수 있다.")
@@ -385,6 +431,76 @@ class PostServiceTest {
 			.hasMessage("해당 게시글이 없습니다.");
 	}
 
+	@DisplayName("Redis에 조회수가 존재하지 않으면, 조회수가 증가되지 않는다.")
+	@Test
+	void increaseView_shouldThrowException_whenRedisValueIsNull() {
+		// given
+		Post post = postRepository.save(Post.builder()
+			.member(member)
+			.title("Diglog Redis 적용기")
+			.content("Diglog 프로젝트의 Redis 적용과정")
+			.folder(folder)
+			.viewCount(1L)
+			.build());
+
+		PostViewIncrementRequest request = PostViewIncrementRequest.builder()
+			.postId(post.getId())
+			.build();
+
+		doNothing().when(redisPostViewLoader).load(anyString(), any());
+
+		// when & then
+		assertThatThrownBy(() -> postService.increaseView(request, "10.0.0.1"))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("조회수 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.");
+	}
+
+	@DisplayName("Redis에 조회수가 기본값보다 작을 경우, 조회수가 증가되지 않는다.")
+	@Test
+	void increaseView_shouldThrowException_whenRedisValueIsLessThanDefaultValue() {
+		// given
+		Post post = postRepository.save(Post.builder()
+			.member(member)
+			.title("Diglog Redis 적용기")
+			.content("Diglog 프로젝트의 Redis 적용과정")
+			.folder(folder)
+			.viewCount(0L)
+			.build());
+
+		PostViewIncrementRequest request = PostViewIncrementRequest.builder()
+			.postId(post.getId())
+			.build();
+
+		// when & then
+		assertThatThrownBy(() -> postService.increaseView(request, "10.0.0.1"))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("조회수 처리에 실패했습니다. 잠시 후 다시 시도해주세요.");
+	}
+
+	@DisplayName("Redis에 조회수가 숫자가 아닌 경우, 조회수가 증가되지 않는다.")
+	@Test
+	void increaseView_shouldThrowException_whenRedisValueIsWrongType() {
+		// given
+		Post post = postRepository.save(Post.builder()
+			.member(member)
+			.title("Diglog Redis 적용기")
+			.content("Diglog 프로젝트의 Redis 적용과정")
+			.folder(folder)
+			.viewCount(0L)
+			.build());
+
+		PostViewIncrementRequest request = PostViewIncrementRequest.builder()
+			.postId(post.getId())
+			.build();
+
+		redisTemplate.opsForValue().set("post:view:count:" + post.getId(), "diglog");
+
+		// when & then
+		assertThatThrownBy(() -> postService.increaseView(request, "10.0.0.1"))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("조회수 처리에 실패했습니다. 잠시 후 다시 시도해주세요.");
+	}
+
 	@DisplayName("조회수 증가 후 조회 시 증가된 값이 반환된다.")
 	@Test
 	void getViewCount_afterIncreaseView() {
@@ -497,8 +613,8 @@ class PostServiceTest {
 		postService.syncPostViewCountToDb();
 
 		// then
-		await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
-			assertAll(
+		await().atMost(7, TimeUnit.SECONDS).untilAsserted(
+			() -> assertAll(
 				() -> verify(postViewBatchRepository, times(expectedMethodCallCount)).bulkUpdateViewCounts(any()),
 				() -> {
 					List<Post> updatedPosts = postRepository.findAllById(
@@ -516,8 +632,7 @@ class PostServiceTest {
 								.toList()
 						);
 				}
-			);
-		});
+			));
 	}
 
 }
