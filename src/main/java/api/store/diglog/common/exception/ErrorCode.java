@@ -56,8 +56,8 @@ public enum ErrorCode {
 	COMMENT_UPDATE_NO_AUTHORITY(BAD_REQUEST, "해당 댓글을 수정할 수 있는 권한이 없습니다."),
 
 	// Redis
-	REDIS_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "서버 상태가 불안정합니다. 잠시 후 다시 시도해주세요."),
-	INVALID_REDIS_VIEW_COUNT_VALUE(HttpStatus.INTERNAL_SERVER_ERROR, "조회수 정보가 잘못되었습니다."),
+	REDIS_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "서비스 연결에 실패했습니다. 잠시 후 다시 시도해주세요."),
+	INVALID_REDIS_VIEW_COUNT_VALUE(HttpStatus.INTERNAL_SERVER_ERROR, "조회수 처리에 실패했습니다. 잠시 후 다시 시도해주세요."),
 	REDIS_VIEW_COUNT_VALUE_MISSING(HttpStatus.INTERNAL_SERVER_ERROR, "조회수 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.");
 
 	private final HttpStatus status;
