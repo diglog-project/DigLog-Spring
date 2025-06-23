@@ -3,17 +3,21 @@ package api.store.diglog.supporter;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
 public abstract class RedisTestSupporter {
 
-	@Container
-	static GenericContainer<?> redisContainer = new GenericContainer<>("redis:7.2")
-		.withExposedPorts(6379)
-		.waitingFor(Wait.forListeningPort());
+	private static final GenericContainer<?> redisContainer;
+
+	static {
+		redisContainer = new GenericContainer<>(DockerImageName.parse("redis:7.2"))
+			.withExposedPorts(6379)
+			.withReuse(true);
+
+		redisContainer.start();
+	}
 
 	@DynamicPropertySource
 	static void overrideRedisProperties(DynamicPropertyRegistry registry) {
