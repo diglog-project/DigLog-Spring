@@ -2,6 +2,7 @@ package api.store.diglog.service.post;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,30 +43,25 @@ public class PostAsyncWorker {
 
 	private Map<UUID, Long> extractValidRedisViewCounts(List<UUID> postIds) {
 		return postIds.stream()
-			.map(id -> {
-				String countKey = REDIS_KEY_PREFIX_VIEW_COUNT + id;
-				String redisViewCountValue = redisTemplate.opsForValue().get(countKey);
-				return Map.entry(id, redisViewCountValue);
-			})
-			.filter(redisViewCount -> isValidRedisViewCount(redisViewCount.getKey(), redisViewCount.getValue()))
-			.collect(Collectors.toMap(
-				Map.Entry::getKey,
-				redisViewCount -> Long.parseLong(redisViewCount.getValue())
-			));
+			.map(this::createRedisViewCountEntry)
+			.filter(Objects::nonNull)
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
-	private boolean isValidRedisViewCount(UUID postId, String redisViewCountValue) {
-		if (redisViewCountValue == null) {
-			log.error(LOG_VIEW_COUNT_NULL, postId);
-			return false;
-		}
+	private Map.Entry<UUID, Long> createRedisViewCountEntry(UUID id) {
+		String countKey = REDIS_KEY_PREFIX_VIEW_COUNT + id;
+		String redisViewCountValue = redisTemplate.opsForValue().get(countKey);
 
 		try {
-			Long.parseLong(redisViewCountValue);
-			return true;
+			if (redisViewCountValue == null) {
+				log.error(LOG_VIEW_COUNT_NULL, id);
+				return null;
+			}
+			
+			return Map.entry(id, Long.parseLong(redisViewCountValue));
 		} catch (NumberFormatException e) {
-			log.error(LOG_VIEW_COUNT_PARSE_FAIL, postId, redisViewCountValue);
-			return false;
+			log.error(LOG_VIEW_COUNT_PARSE_FAIL, id, redisViewCountValue);
+			return null;
 		}
 	}
 
