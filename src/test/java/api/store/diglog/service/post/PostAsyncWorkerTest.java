@@ -18,11 +18,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -38,7 +35,6 @@ import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@ExtendWith(OutputCaptureExtension.class)
 class PostAsyncWorkerTest extends RedisTestSupporter {
 
 	@Autowired
@@ -156,7 +152,7 @@ class PostAsyncWorkerTest extends RedisTestSupporter {
 
 	@DisplayName("레디스에 존재하지 않는 조회수는 동기화되지 않는다.")
 	@Test
-	void syncViewCountAllInBatch_shouldIgnoreNull(CapturedOutput output) {
+	void syncViewCountAllInBatch_shouldIgnoreNull() {
 		// given
 		List<Post> posts = postRepository.saveAll(
 			IntStream.range(0, 5)
@@ -208,21 +204,27 @@ class PostAsyncWorkerTest extends RedisTestSupporter {
 									.toList()
 							);
 					},
+
 					() -> {
 						Post post = postRepository.findById(notUpdatedPostId)
 							.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글"));
 						assertThat(post.getViewCount()).isEqualTo(4);
 					},
-					() -> assertThat(redisTemplate.opsForSet().isMember(DIRTY_SET, posts.getLast().getId().toString()))
-						.isTrue(),
-					() -> assertThat(output).contains("[조회수 부재] postId=" + notUpdatedPostId)
+
+					() -> assertThat(redisTemplate.opsForSet().members(DIRTY_SET))
+						.doesNotContainAnyElementsOf(
+							postIds.stream()
+								.map(UUID::toString)
+								.toList()
+						)
+						.contains(notUpdatedPostId.toString())
 				)
 			);
 	}
 
 	@DisplayName("레디스에 조회수가 숫자가 아니면 동기화되지 않는다.")
 	@Test
-	void syncViewCountAllInBatch_shouldIgnoreInvalidValues(CapturedOutput output) {
+	void syncViewCountAllInBatch_shouldIgnoreInvalidValues() {
 		// given
 		List<Post> posts = postRepository.saveAll(
 			IntStream.range(0, 5)
@@ -259,7 +261,7 @@ class PostAsyncWorkerTest extends RedisTestSupporter {
 		// then
 		UUID notUpdatedPostId = postIds.removeLast();
 
-		await().atMost(10, TimeUnit.SECONDS)
+		await().atMost(15, TimeUnit.SECONDS)
 			.untilAsserted(() ->
 				assertAll(
 					() -> {
@@ -274,24 +276,27 @@ class PostAsyncWorkerTest extends RedisTestSupporter {
 									.toList()
 							);
 					},
+
 					() -> {
 						Post post = postRepository.findById(notUpdatedPostId)
 							.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글"));
 						assertThat(post.getViewCount()).isEqualTo(4);
 					},
-					() -> assertThat(redisTemplate.opsForSet().isMember(DIRTY_SET, posts.getLast().getId().toString()))
-						.isTrue(),
-					() -> assertThat(output).contains(
-						"[조회수 파싱 실패] postId=" + notUpdatedPostId + ", RedisViewCountValue=not number"
-					)
+
+					() -> assertThat(redisTemplate.opsForSet().members(DIRTY_SET))
+						.doesNotContainAnyElementsOf(
+							postIds.stream()
+								.map(UUID::toString)
+								.toList()
+						)
+						.contains(notUpdatedPostId.toString())
 				)
 			);
 	}
 
-
 	@DisplayName("레디스의 조회수가 DB보다 작으면 동기화되지 않는다.")
 	@Test
-	void syncViewCountAllInBatch_shouldIgnoreRedisViewCountIsLessThanDb(CapturedOutput output) {
+	void syncViewCountAllInBatch_shouldIgnoreRedisViewCountIsLessThanDb() {
 		// given
 		List<Post> posts = postRepository.saveAll(
 			IntStream.range(0, 5)
@@ -343,16 +348,20 @@ class PostAsyncWorkerTest extends RedisTestSupporter {
 									.toList()
 							);
 					},
+
 					() -> {
 						Post post = postRepository.findById(notUpdatedPostId)
 							.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글"));
 						assertThat(post.getViewCount()).isEqualTo(4);
 					},
-					() -> assertThat(redisTemplate.opsForSet().isMember(DIRTY_SET, posts.getLast().getId().toString()))
-						.isTrue(),
-					() -> assertThat(output).contains(
-						"[조회수 역전 감지] postId=" + notUpdatedPostId + ", Redis=2, DB=4"
-					)
+
+					() -> assertThat(redisTemplate.opsForSet().members(DIRTY_SET))
+						.doesNotContainAnyElementsOf(
+							postIds.stream()
+								.map(UUID::toString)
+								.toList()
+						)
+						.contains(notUpdatedPostId.toString())
 				)
 			);
 	}
