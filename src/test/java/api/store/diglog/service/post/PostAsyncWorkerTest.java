@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,8 +18,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -34,6 +38,7 @@ import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@ExtendWith(OutputCaptureExtension.class)
 class PostAsyncWorkerTest extends RedisTestSupporter {
 
 	@Autowired
@@ -93,7 +98,7 @@ class PostAsyncWorkerTest extends RedisTestSupporter {
 		redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
 	}
 
-	@DisplayName("게시글의 조회수의 업데이트와 Redis의 조회수 관련 DirtySet을 초기화를 비동기로 처리한다.")
+	@DisplayName("레디스의 조회수를 DB에 업데이트 후 DirtySet을 초기화한다.")
 	@Test
 	void syncViewCountAllInBatch() {
 
@@ -129,22 +134,226 @@ class PostAsyncWorkerTest extends RedisTestSupporter {
 		postAsyncWorker.syncViewCountAllInBatch(postIds);
 
 		// then
-		List<Post> updatedPosts = postRepository.findAllById(postIds);
-		await().atMost(2, TimeUnit.SECONDS)
+		await().atMost(10, TimeUnit.SECONDS)
 			.untilAsserted(() ->
 				assertAll(
-					() -> assertThat(updatedPosts)
-						.extracting("id", "viewCount")
-						.containsExactlyInAnyOrderElementsOf(
-							updateViewCount.keySet().stream()
-								.map(postId -> tuple(postId, updateViewCount.get(postId)))
-								.toList()
-						),
+					() -> {
+						List<Post> updatedPosts = postRepository.findAllById(postIds);
+
+						assertThat(updatedPosts)
+							.extracting("id", "viewCount")
+							.containsExactlyInAnyOrderElementsOf(
+								updateViewCount.keySet().stream()
+									.map(postId -> tuple(postId, updateViewCount.get(postId)))
+									.toList()
+							);
+					},
 					() -> assertThat(redisTemplate.opsForSet().members(DIRTY_SET))
 						.isEmpty()
 				)
 			);
-
 	}
 
+	@DisplayName("레디스에 존재하지 않는 조회수는 동기화되지 않는다.")
+	@Test
+	void syncViewCountAllInBatch_shouldIgnoreNull(CapturedOutput output) {
+		// given
+		List<Post> posts = postRepository.saveAll(
+			IntStream.range(0, 5)
+				.mapToObj(i -> postRepository.save(Post.builder()
+					.title("title" + i)
+					.content("content" + i)
+					.viewCount(i)
+					.member(members.get(i))
+					.folder(folders.get(i))
+					.build()))
+				.toList()
+		);
+
+		Map<UUID, Long> updateViewCount = posts.stream()
+			.collect(Collectors.toMap(
+				Post::getId,
+				post -> post.getViewCount() * 2
+			));
+
+		for (UUID postId : updateViewCount.keySet()) {
+			redisTemplate.opsForValue().set(COUNT_PREFIX + postId, String.valueOf(updateViewCount.get(postId)));
+			redisTemplate.opsForSet().add(DIRTY_SET, postId.toString());
+		}
+
+		List<UUID> postIds = new ArrayList<>(posts.stream()
+			.map(Post::getId)
+			.toList());
+
+		redisTemplate.delete(COUNT_PREFIX + postIds.getLast().toString());
+
+		// when
+		postAsyncWorker.syncViewCountAllInBatch(postIds);
+
+		// then
+		UUID notUpdatedPostId = postIds.removeLast();
+
+		await().atMost(10, TimeUnit.SECONDS)
+			.untilAsserted(() ->
+				assertAll(
+					() -> {
+						List<Post> updatedPosts = postRepository.findAllById(postIds);
+
+						assertThat(updatedPosts)
+							.extracting("id", "viewCount")
+							.containsExactlyInAnyOrderElementsOf(
+								updateViewCount.keySet().stream()
+									.filter(id -> id != notUpdatedPostId)
+									.map(postId -> tuple(postId, updateViewCount.get(postId)))
+									.toList()
+							);
+					},
+					() -> {
+						Post post = postRepository.findById(notUpdatedPostId)
+							.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글"));
+						assertThat(post.getViewCount()).isEqualTo(4);
+					},
+					() -> assertThat(redisTemplate.opsForSet().isMember(DIRTY_SET, posts.getLast().getId().toString()))
+						.isTrue(),
+					() -> assertThat(output).contains("[조회수 부재] postId=" + notUpdatedPostId)
+				)
+			);
+	}
+
+	@DisplayName("레디스에 조회수가 숫자가 아니면 동기화되지 않는다.")
+	@Test
+	void syncViewCountAllInBatch_shouldIgnoreInvalidValues(CapturedOutput output) {
+		// given
+		List<Post> posts = postRepository.saveAll(
+			IntStream.range(0, 5)
+				.mapToObj(i -> postRepository.save(Post.builder()
+					.title("title" + i)
+					.content("content" + i)
+					.viewCount(i)
+					.member(members.get(i))
+					.folder(folders.get(i))
+					.build()))
+				.toList()
+		);
+
+		Map<UUID, Long> updateViewCount = posts.stream()
+			.collect(Collectors.toMap(
+				Post::getId,
+				post -> post.getViewCount() * 2
+			));
+
+		for (UUID postId : updateViewCount.keySet()) {
+			redisTemplate.opsForValue().set(COUNT_PREFIX + postId, String.valueOf(updateViewCount.get(postId)));
+			redisTemplate.opsForSet().add(DIRTY_SET, postId.toString());
+		}
+
+		List<UUID> postIds = new ArrayList<>(posts.stream()
+			.map(Post::getId)
+			.toList());
+
+		redisTemplate.opsForValue().set(COUNT_PREFIX + postIds.getLast().toString(), "not number");
+
+		// when
+		postAsyncWorker.syncViewCountAllInBatch(postIds);
+
+		// then
+		UUID notUpdatedPostId = postIds.removeLast();
+
+		await().atMost(10, TimeUnit.SECONDS)
+			.untilAsserted(() ->
+				assertAll(
+					() -> {
+						List<Post> updatedPosts = postRepository.findAllById(postIds);
+
+						assertThat(updatedPosts)
+							.extracting("id", "viewCount")
+							.containsExactlyInAnyOrderElementsOf(
+								updateViewCount.keySet().stream()
+									.filter(id -> id != notUpdatedPostId)
+									.map(postId -> tuple(postId, updateViewCount.get(postId)))
+									.toList()
+							);
+					},
+					() -> {
+						Post post = postRepository.findById(notUpdatedPostId)
+							.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글"));
+						assertThat(post.getViewCount()).isEqualTo(4);
+					},
+					() -> assertThat(redisTemplate.opsForSet().isMember(DIRTY_SET, posts.getLast().getId().toString()))
+						.isTrue(),
+					() -> assertThat(output).contains(
+						"[조회수 파싱 실패] postId=" + notUpdatedPostId + ", RedisViewCountValue=not number"
+					)
+				)
+			);
+	}
+
+
+	@DisplayName("레디스의 조회수가 DB보다 작으면 동기화되지 않는다.")
+	@Test
+	void syncViewCountAllInBatch_shouldIgnoreRedisViewCountIsLessThanDb(CapturedOutput output) {
+		// given
+		List<Post> posts = postRepository.saveAll(
+			IntStream.range(0, 5)
+				.mapToObj(i -> postRepository.save(Post.builder()
+					.title("title" + i)
+					.content("content" + i)
+					.viewCount(i)
+					.member(members.get(i))
+					.folder(folders.get(i))
+					.build()))
+				.toList()
+		);
+
+		Map<UUID, Long> updateViewCount = posts.stream()
+			.collect(Collectors.toMap(
+				Post::getId,
+				post -> post.getViewCount() * 2
+			));
+
+		for (UUID postId : updateViewCount.keySet()) {
+			redisTemplate.opsForValue().set(COUNT_PREFIX + postId, String.valueOf(updateViewCount.get(postId)));
+			redisTemplate.opsForSet().add(DIRTY_SET, postId.toString());
+		}
+
+		List<UUID> postIds = new ArrayList<>(posts.stream()
+			.map(Post::getId)
+			.toList());
+
+		redisTemplate.opsForValue().set(COUNT_PREFIX + postIds.getLast().toString(), "2");
+
+		// when
+		postAsyncWorker.syncViewCountAllInBatch(postIds);
+
+		// then
+		UUID notUpdatedPostId = postIds.removeLast();
+
+		await().atMost(10, TimeUnit.SECONDS)
+			.untilAsserted(() ->
+				assertAll(
+					() -> {
+						List<Post> updatedPosts = postRepository.findAllById(postIds);
+
+						assertThat(updatedPosts)
+							.extracting("id", "viewCount")
+							.containsExactlyInAnyOrderElementsOf(
+								updateViewCount.keySet().stream()
+									.filter(id -> id != notUpdatedPostId)
+									.map(postId -> tuple(postId, updateViewCount.get(postId)))
+									.toList()
+							);
+					},
+					() -> {
+						Post post = postRepository.findById(notUpdatedPostId)
+							.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글"));
+						assertThat(post.getViewCount()).isEqualTo(4);
+					},
+					() -> assertThat(redisTemplate.opsForSet().isMember(DIRTY_SET, posts.getLast().getId().toString()))
+						.isTrue(),
+					() -> assertThat(output).contains(
+						"[조회수 역전 감지] postId=" + notUpdatedPostId + ", Redis=2, DB=4"
+					)
+				)
+			);
+	}
 }

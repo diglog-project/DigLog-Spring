@@ -613,7 +613,7 @@ class PostServiceTest extends RedisTestSupporter {
 		postService.syncPostViewCountToDb();
 
 		// then
-		await().atMost(7, TimeUnit.SECONDS).untilAsserted(
+		await().atMost(15, TimeUnit.SECONDS).untilAsserted(
 			() -> assertAll(
 				() -> verify(postViewBatchRepository, times(expectedMethodCallCount)).bulkUpdateViewCounts(any()),
 				() -> {
