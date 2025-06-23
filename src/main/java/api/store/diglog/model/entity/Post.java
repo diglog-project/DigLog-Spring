@@ -76,12 +76,4 @@ public class Post {
 		this.folder = folder;
 	}
 
-	public void updateViewCount(long viewCount) {
-
-		if (this.viewCount > viewCount) {
-			throw new IllegalArgumentException("조회수 에러");
-		}
-
-		this.viewCount = viewCount;
-	}
 }
