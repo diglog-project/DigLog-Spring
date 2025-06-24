@@ -12,7 +12,7 @@ public class SyncScheduler {
 
 	private final PostService postService;
 
-	@Scheduled(fixedDelay = 10_000)
+	@Scheduled(fixedDelay = 300_000)
 	public void syncPostViewCount() {
 		postService.syncPostViewCountToDb();
 	}
