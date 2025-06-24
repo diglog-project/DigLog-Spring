@@ -83,7 +83,7 @@ public class ImageService {
 			.filter(url -> !imagePostVO.getUrls().contains(url))
 			.toList();
 		s3Util.deleteImages(deleteImageUrls);
-		imageRepository.deleteAllByRefIdAndUrls(refId, deleteImageUrls);
+		imageRepository.deleteAllByRefIdAndUrlIn(refId, deleteImageUrls);
 
 		List<String> notExistUrls = imagePostVO.getUrls().stream()
 			.filter(url -> !postImageUrls.contains(url))

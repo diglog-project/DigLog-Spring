@@ -115,11 +115,9 @@ public class CommentService {
 	@Transactional
 	public void delete(UUID commentId) {
 		Member member = memberService.getCurrentMember();
+		Comment comment = commentRepository.findByIdAndMember(commentId, member)
+			.orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
 
-		int result = commentRepository.updateIsDeletedByCommentIdAndMemberId(commentId, member.getId());
-
-		if (result <= 0) {
-			throw new CustomException(COMMENT_IS_DELETED_NO_CHANGE);
-		}
+		comment.softDelete();
 	}
 }

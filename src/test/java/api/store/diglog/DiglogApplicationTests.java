@@ -9,8 +9,8 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest
 class DiglogApplicationTests {
 
-    @Test
-    void contextLoads() {
-    }
+	@Test
+	void contextLoads() {
+	}
 
 }

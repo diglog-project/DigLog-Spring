@@ -219,12 +219,10 @@ public class PostService {
 	@Transactional
 	public void delete(UUID id) {
 		Member member = memberService.getCurrentMember();
+		Post post = postRepository.findByIdAndMember(id, member)
+			.orElseThrow(() -> new CustomException(POST_NOT_FOUND));
 
-		int deletedRows = postRepository.updatePostIsDeleted(id, member);
-
-		if (deletedRows == 0) {
-			throw new CustomException(POST_DELETE_FAILED);
-		}
+		post.softDelete();
 	}
 
 	public void increaseView(PostViewIncrementRequest postViewIncrementRequest, String userIpAddress) {
