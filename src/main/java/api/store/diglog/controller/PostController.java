@@ -1,15 +1,31 @@
 package api.store.diglog.controller;
 
-import api.store.diglog.model.dto.post.*;
-import api.store.diglog.service.PostService;
-import lombok.RequiredArgsConstructor;
+import java.util.UUID;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
+import api.store.diglog.model.dto.post.PostFolderUpdateRequest;
+import api.store.diglog.model.dto.post.PostListMemberRequest;
+import api.store.diglog.model.dto.post.PostListMemberTagRequest;
+import api.store.diglog.model.dto.post.PostListSearchRequest;
+import api.store.diglog.model.dto.post.PostRequest;
+import api.store.diglog.model.dto.post.PostResponse;
+import api.store.diglog.model.dto.post.PostUpdateRequest;
+import api.store.diglog.model.dto.post.PostViewIncrementRequest;
+import api.store.diglog.model.dto.post.PostViewResponse;
+import api.store.diglog.service.post.PostService;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/post")
@@ -83,5 +99,25 @@ public class PostController {
 		postService.delete(id);
 
 		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/view/increment")
+	public ResponseEntity<Void> increasePostView(
+		@RequestBody PostViewIncrementRequest postViewIncrementRequest,
+		HttpServletRequest httpServletRequest
+	) {
+		String clientIp = httpServletRequest.getHeader("X-Forwarded-For");
+		if (clientIp == null) {
+			clientIp = httpServletRequest.getRemoteAddr();
+		}
+
+		postService.increaseView(postViewIncrementRequest, clientIp);
+		return ResponseEntity.noContent().build();
+	}
+
+	@GetMapping("/view/{id}")
+	public ResponseEntity<PostViewResponse> getPostView(@PathVariable(value = "id") UUID id) {
+		PostViewResponse postViewResponse = postService.getViewCount(id);
+		return ResponseEntity.ok().body(postViewResponse);
 	}
 }
