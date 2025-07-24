@@ -11,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -23,9 +24,16 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(
-	name = "subscribe",
+	name = "subscription",
 	uniqueConstraints = {
-		@UniqueConstraint(columnNames = {"author_id", "subscriber_id"})
+		@UniqueConstraint(
+			name = "uk_subscription_author_subscriber",
+			columnNames = {"author_id", "subscriber_id"}
+		)
+	},
+	indexes = {
+		@Index(name = "idx_subscription_author", columnList = "author_id"),
+		@Index(name = "idx_subscription_subscriber", columnList = "subscriber_id"),
 	}
 )
 @EntityListeners(AuditingEntityListener.class)
@@ -33,7 +41,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Getter
-public class Subscribe {
+public class Subscription {
 
 	@Id
 	private UUID id;
@@ -47,7 +55,7 @@ public class Subscribe {
 	private Member subscriber;
 
 	@Column(nullable = false)
-	private boolean notify_enabled;
+	private boolean notificationEnabled;
 
 	@CreatedDate
 	private LocalDateTime createdAt;
