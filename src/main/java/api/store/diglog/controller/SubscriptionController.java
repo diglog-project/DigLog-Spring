@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import api.store.diglog.model.dto.subscribe.SubscribeCreateRequest;
-import api.store.diglog.model.dto.subscribe.SubscribeCreateResponse;
+import api.store.diglog.model.dto.subscribe.SubscriptionCreateRequest;
+import api.store.diglog.model.dto.subscribe.SubscriptionCreateResponse;
 import api.store.diglog.service.SubscriptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +20,10 @@ public class SubscriptionController {
 	private final SubscriptionService subscriptionService;
 
 	@PostMapping
-	public ResponseEntity<SubscribeCreateResponse> create(
-		@RequestBody @Valid SubscribeCreateRequest request
+	public ResponseEntity<SubscriptionCreateResponse> create(
+		@RequestBody @Valid SubscriptionCreateRequest request
 	) {
-		SubscribeCreateResponse subscribeCreateResponse = subscriptionService.createSubscription(request);
-		return ResponseEntity.ok().body(subscribeCreateResponse);
+		SubscriptionCreateResponse response = subscriptionService.createSubscription(request);
+		return ResponseEntity.ok().body(response);
 	}
 }

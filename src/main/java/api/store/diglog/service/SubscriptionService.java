@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.common.exception.CustomException;
-import api.store.diglog.model.dto.subscribe.SubscribeCreateRequest;
-import api.store.diglog.model.dto.subscribe.SubscribeCreateResponse;
+import api.store.diglog.model.dto.subscribe.SubscriptionCreateRequest;
+import api.store.diglog.model.dto.subscribe.SubscriptionCreateResponse;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Subscription;
 import api.store.diglog.repository.SubscriptionRepository;
@@ -25,8 +25,8 @@ public class SubscriptionService {
 	private final MemberService memberService;
 
 	@Transactional
-	public SubscribeCreateResponse createSubscription(SubscribeCreateRequest subscribeCreateRequest) {
-		Member author = memberService.findMemberById(subscribeCreateRequest.getAuthorId());
+	public SubscriptionCreateResponse createSubscription(SubscriptionCreateRequest subscriptionCreateRequest) {
+		Member author = memberService.findMemberById(subscriptionCreateRequest.getAuthorId());
 		Member subscriber = memberService.getCurrentMember();
 
 		validateActiveAuthor(author);
@@ -38,11 +38,11 @@ public class SubscriptionService {
 			.id(UUID.randomUUID())
 			.author(author)
 			.subscriber(subscriber)
-			.notificationEnabled(subscribeCreateRequest.getNotificationEnabled())
+			.notificationEnabled(subscriptionCreateRequest.getNotificationEnabled())
 			.build();
 		Subscription savedSubscription = subscriptionRepository.save(subscription);
 
-		return SubscribeCreateResponse.builder()
+		return SubscriptionCreateResponse.builder()
 			.authorId(author.getId())
 			.authorNickname(author.getUsername())
 			.subscriberId(subscriber.getId())
