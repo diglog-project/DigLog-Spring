@@ -17,6 +17,8 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
 
 	Optional<Member> findByUsernameAndIsDeletedFalse(String username);
 
+	Optional<Member> findByIdAndIsDeletedFalse(UUID id);
+
 	Page<Member> findAllByUsernameContainingIgnoreCaseAndIsDeletedFalse(String username, Pageable pageable);
 
 	int countByUsername(String username);
