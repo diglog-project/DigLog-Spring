@@ -45,7 +45,7 @@ public class Member {
 	@Column(nullable = false)
 	private String password;
 
-	@ElementCollection(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.LAZY)
 	@CollectionTable(name = "member_roles", joinColumns = @JoinColumn(name = "member_id"))
 	@Column(name = "role")
 	@Enumerated(EnumType.STRING)
@@ -80,12 +80,9 @@ public class Member {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		Member member = (Member)o;
-		return Objects.equals(id, member.id);
+		if (this == o) return true;
+		if (!(o instanceof Member other)) return false;
+		return Objects.equals(this.id, other.id);
 	}
 
 	@Override
