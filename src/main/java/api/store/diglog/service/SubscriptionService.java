@@ -96,15 +96,17 @@ public class SubscriptionService {
 		}
 	}
 
-	private void validateCurrentMemberIsSubscriber(Member currentMember, Member subscriber) {
-		if (isDifferentMember(currentMember, subscriber)) {
-			throw new CustomException(SUBSCRIPTION_MISMATCH_CURRENT_MEMBER_SUBSCRIBER);
-		}
+	@Transactional
+	public void cancelSubscription(UUID subscriptionId) {
+		Member currentMember = memberService.getCurrentMember();
+		Subscription subscription = subscriptionRepository.findByIdFetchSubscriber(subscriptionId)
+			.orElseThrow(() -> new CustomException(SUBSCRIPTION_NOT_FOUND));
+
+		validateCurrentMemberIsSubscriber(currentMember, subscription.getSubscriber());
+
+		subscriptionRepository.delete(subscription);
 	}
 
-	private boolean isDifferentMember(Member currentMember, Member subscriber) {
-		return !subscriber.equals(currentMember);
-	}
 
 	private void validateActiveAuthor(Member author) {
 		if (author.isDeleted()) {
@@ -137,4 +139,13 @@ public class SubscriptionService {
 		}
 	}
 
+	private void validateCurrentMemberIsSubscriber(Member currentMember, Member subscriber) {
+		if (isDifferentMember(currentMember, subscriber)) {
+			throw new CustomException(SUBSCRIPTION_MISMATCH_CURRENT_MEMBER_SUBSCRIBER);
+		}
+	}
+
+	private boolean isDifferentMember(Member currentMember, Member subscriber) {
+		return !subscriber.equals(currentMember);
+	}
 }
