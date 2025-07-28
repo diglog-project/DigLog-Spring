@@ -15,6 +15,7 @@ import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.dto.subscribe.SubscriberResponse;
 import api.store.diglog.model.dto.subscribe.SubscriptionCreateRequest;
 import api.store.diglog.model.dto.subscribe.SubscriptionCreateResponse;
+import api.store.diglog.model.dto.subscribe.SubscriptionNotificationActivationRequest;
 import api.store.diglog.model.dto.subscribe.SubscriptionResponse;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Subscription;
@@ -75,6 +76,34 @@ public class SubscriptionService {
 			.notificationEnabled(savedSubscription.isNotificationEnabled())
 			.createdAt(savedSubscription.getCreatedAt())
 			.build();
+	}
+
+	@Transactional
+	public void updateNotificationSetting(
+		UUID subscriptionId,
+		SubscriptionNotificationActivationRequest request
+	) {
+		Member currentMember = memberService.getCurrentMember();
+		Subscription subscription = subscriptionRepository.findByIdFetchSubscriber(subscriptionId)
+			.orElseThrow(() -> new CustomException(SUBSCRIPTION_NOT_FOUND));
+
+		validateCurrentMemberIsSubscriber(currentMember, subscription.getSubscriber());
+
+		if (request.getNotificationEnabled()) {
+			subscription.enableNotification();
+		} else {
+			subscription.disableNotification();
+		}
+	}
+
+	private void validateCurrentMemberIsSubscriber(Member currentMember, Member subscriber) {
+		if (isDifferentMember(currentMember, subscriber)) {
+			throw new CustomException(SUBSCRIPTION_MISMATCH_CURRENT_MEMBER_SUBSCRIBER);
+		}
+	}
+
+	private boolean isDifferentMember(Member currentMember, Member subscriber) {
+		return !subscriber.equals(currentMember);
 	}
 
 	private void validateActiveAuthor(Member author) {

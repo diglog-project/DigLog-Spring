@@ -60,4 +60,12 @@ public class Subscription {
 	@CreatedDate
 	private LocalDateTime createdAt;
 
+	public void enableNotification() {
+		this.notificationEnabled = true;
+	}
+
+	public void disableNotification() {
+		this.notificationEnabled = false;
+	}
+
 }
