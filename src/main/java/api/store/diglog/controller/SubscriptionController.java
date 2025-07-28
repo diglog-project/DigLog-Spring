@@ -54,7 +54,7 @@ public class SubscriptionController {
 	public ResponseEntity<SubscriptionCreateResponse> create(
 		@RequestBody @Valid SubscriptionCreateRequest request
 	) {
-		SubscriptionCreateResponse response = subscriptionService.createSubscription(request);
+		SubscriptionCreateResponse response = subscriptionService.create(request);
 		return ResponseEntity.ok().body(response);
 	}
 
@@ -68,8 +68,8 @@ public class SubscriptionController {
 	}
 
 	@DeleteMapping("/{subscriptionId}")
-	public ResponseEntity<Void> cancelSubscription(@PathVariable("subscriptionId") UUID subscriptionId) {
-		subscriptionService.cancelSubscription(subscriptionId);
+	public ResponseEntity<Void> cancel(@PathVariable("subscriptionId") UUID subscriptionId) {
+		subscriptionService.cancel(subscriptionId);
 		return ResponseEntity.noContent().build();
 	}
 }

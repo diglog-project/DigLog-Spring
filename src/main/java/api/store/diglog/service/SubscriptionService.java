@@ -51,7 +51,7 @@ public class SubscriptionService {
 	}
 
 	@Transactional
-	public SubscriptionCreateResponse createSubscription(SubscriptionCreateRequest subscriptionCreateRequest) {
+	public SubscriptionCreateResponse create(SubscriptionCreateRequest subscriptionCreateRequest) {
 		Member author = memberService.findMemberById(subscriptionCreateRequest.getAuthorId());
 		Member subscriber = memberService.getCurrentMember();
 
@@ -97,7 +97,7 @@ public class SubscriptionService {
 	}
 
 	@Transactional
-	public void cancelSubscription(UUID subscriptionId) {
+	public void cancel(UUID subscriptionId) {
 		Member currentMember = memberService.getCurrentMember();
 		Subscription subscription = subscriptionRepository.findByIdFetchSubscriber(subscriptionId)
 			.orElseThrow(() -> new CustomException(SUBSCRIPTION_NOT_FOUND));
