@@ -11,7 +11,11 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import api.store.diglog.service.notification.NotificationSubscriber;
 
 @Configuration
 public class RedisConfig {
@@ -31,8 +35,8 @@ public class RedisConfig {
 
 	@Bean
 	@Primary
-	public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-		RedisTemplate<String, String> template = new RedisTemplate<>();
+	public RedisTemplate<?, ?> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+		RedisTemplate<?, ?> template = new RedisTemplate<>();
 		template.setConnectionFactory(redisConnectionFactory);
 
 		template.setKeySerializer(new StringRedisSerializer());
@@ -42,8 +46,19 @@ public class RedisConfig {
 
 		template.setEnableTransactionSupport(false);
 		template.afterPropertiesSet();
-		
+
 		return template;
+	}
+
+	@Bean
+	public RedisMessageListenerContainer container(
+		RedisConnectionFactory connectionFactory,
+		NotificationSubscriber notificationSubscriber
+	) {
+		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+		container.setConnectionFactory(connectionFactory);
+		container.addMessageListener(notificationSubscriber, new ChannelTopic("notification-channel"));
+		return container;
 	}
 
 	@Bean
