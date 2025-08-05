@@ -107,7 +107,6 @@ public class SubscriptionService {
 		subscriptionRepository.delete(subscription);
 	}
 
-
 	private void validateActiveAuthor(Member author) {
 		if (author.isDeleted()) {
 			throw new CustomException(SUBSCRIPTION_INACTIVE_AUTHOR);
@@ -140,12 +139,9 @@ public class SubscriptionService {
 	}
 
 	private void validateCurrentMemberIsSubscriber(Member currentMember, Member subscriber) {
-		if (isDifferentMember(currentMember, subscriber)) {
+		if (subscriber.isDifferent(currentMember)) {
 			throw new CustomException(SUBSCRIPTION_MISMATCH_CURRENT_MEMBER_SUBSCRIBER);
 		}
 	}
 
-	private boolean isDifferentMember(Member currentMember, Member subscriber) {
-		return !subscriber.equals(currentMember);
-	}
 }
