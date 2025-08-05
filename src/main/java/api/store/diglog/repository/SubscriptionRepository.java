@@ -1,5 +1,6 @@
 package api.store.diglog.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,5 +28,8 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
 
 	@EntityGraph(attributePaths = "subscriber")
 	Page<Subscription> findAllByAuthorAndSubscriberIsDeletedFalse(Member author, Pageable pageable);
+
+	@EntityGraph(attributePaths = "subscriber")
+	List<Subscription> findAllByAuthorAndSubscriberIsDeletedFalse(Member author);
 
 }
