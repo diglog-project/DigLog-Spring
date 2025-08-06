@@ -56,7 +56,7 @@ public class CommentCreationNotificationStrategy implements NotificationStrategy
 	}
 
 	private void validateSelfCommentNotification(Member author, Member commenter) {
-		if (commenter.isDifferent(author)) {
+		if (commenter.isSame(author)) {
 			throw new CustomException(NOTIFICATION_SELF_COMMENT);
 		}
 	}

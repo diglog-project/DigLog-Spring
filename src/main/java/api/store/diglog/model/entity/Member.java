@@ -84,8 +84,12 @@ public class Member {
 		this.username = username;
 	}
 
+	public boolean isSame(Member other) {
+		return this.equals(other);
+	}
+
 	public boolean isDifferent(Member other) {
-		return !this.equals(other);
+		return !isSame(other);
 	}
 
 	@Override
