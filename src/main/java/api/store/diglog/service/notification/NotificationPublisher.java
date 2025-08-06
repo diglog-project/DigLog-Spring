@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import api.store.diglog.common.util.BatchPartition;
 import api.store.diglog.model.dto.notification.NotificationPayload;
+import api.store.diglog.model.entity.notification.Notification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,22 +36,20 @@ public class NotificationPublisher {
 		);
 	}
 
-	public void publish(List<UUID> subscriberIds, String message) {
-		BatchPartition<UUID> batches = BatchPartition.of(subscriberIds, BATCH_SIZE);
+	public void publish(List<Notification> notifications) {
+		BatchPartition<Notification> batches = BatchPartition.of(notifications, BATCH_SIZE);
 
 		batches.stream()
 			.forEach(batch -> {
 				List<NotificationPayload> payloads = batch.stream()
-					.map(id -> NotificationPayload.builder()
-						.receiverId(id)
-						.message(message)
+					.map(notification -> NotificationPayload.builder()
+						.receiverId(notification.getId())
+						.message(notification.getMessage())
 						.build())
 					.toList();
 
-				// JSON으로 변환해서 전송 (String 전송 권장)
-				String jsonPayload;
 				try {
-					jsonPayload = objectMapper.writeValueAsString(payloads);
+					String jsonPayload = objectMapper.writeValueAsString(payloads);
 					redisTemplate.convertAndSend("notification-channel", jsonPayload);
 				} catch (JsonProcessingException e) {
 					log.error("Failed to serialize payloads", e);
