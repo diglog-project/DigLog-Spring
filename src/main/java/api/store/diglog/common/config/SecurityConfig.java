@@ -47,6 +47,7 @@ public class SecurityConfig {
 		String[] swaggerApi = {"/swagger-ui/**", "/bus/v3/api-docs/**", "/v3/api-docs/**"};
 		String[] memberApi = {"/api/member/login", "/api/member/logout", "/api/member/refresh", "/api/member/profile/*",
 			"/api/member/profile/search/*", "/api/verify/**"};
+		String[] postApi = {"/api/post/view/increment"};
 		String[] postGetApi = {"/api/post", "/api/post/*", "/api/post/member/tag", "/api/post/view/*"};
 		String[] commentGetApi = {"/api/comment"};
 		String[] folderGetApi = {"/api/folders/**"};
@@ -56,6 +57,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
 				.requestMatchers(swaggerApi).permitAll()
 				.requestMatchers(memberApi).permitAll()
+				.requestMatchers(HttpMethod.POST, postApi).permitAll()
 				.requestMatchers(HttpMethod.GET, postGetApi).permitAll()
 				.requestMatchers(HttpMethod.GET, commentGetApi).permitAll()
 				.requestMatchers(HttpMethod.GET, folderGetApi).permitAll()
