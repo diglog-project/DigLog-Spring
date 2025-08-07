@@ -51,7 +51,8 @@ public class SecurityConfig {
 		String[] commentGetApi = {"/api/comment"};
 		String[] folderGetApi = {"/api/folders/**"};
 		String[] tagGetApi = {"/api/tag/**"};
-		String[] subscribeGetApi = {"/api/subscribe/**"};
+		String[] subscribeGetApi = {"/api/subscriptions/**"};
+		String[] notificationGetApi = {"/api/notifications/**"};
 
 		http
 			.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
@@ -62,6 +63,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, folderGetApi).permitAll()
 				.requestMatchers(HttpMethod.GET, tagGetApi).permitAll()
 				.requestMatchers(HttpMethod.GET, subscribeGetApi).permitAll()
+				.requestMatchers(HttpMethod.GET, notificationGetApi).permitAll()
 				.anyRequest().authenticated())
 
 			.csrf(AbstractHttpConfigurer::disable)

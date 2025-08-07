@@ -37,10 +37,6 @@ public class Notification {
 	@JoinColumn(name = "receiver_id")
 	private Member receiver;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "sender_id")
-	private Member sender;
-
 	@Enumerated(EnumType.STRING)
 	private NotificationType notificationType;
 
@@ -49,9 +45,6 @@ public class Notification {
 
 	@Column(nullable = false)
 	private boolean isRead;
-
-	@Column(nullable = false, columnDefinition = "boolean default false")
-	private boolean isDeleted;
 
 	@CreatedDate
 	private LocalDateTime createdAt;

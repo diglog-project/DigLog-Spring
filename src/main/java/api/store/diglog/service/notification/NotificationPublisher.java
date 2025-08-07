@@ -1,7 +1,6 @@
 package api.store.diglog.service.notification;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -26,16 +25,6 @@ public class NotificationPublisher {
 	private final RedisTemplate<String, String> redisTemplate;
 	private final ObjectMapper objectMapper;
 
-	public void publish(UUID subscriberId, String message) {
-		redisTemplate.convertAndSend(
-			REDIS_NOTIFICATION_CHANNEL,
-			NotificationPayload.builder()
-				.receiverId(subscriberId)
-				.message(message)
-				.build()
-		);
-	}
-
 	public void publish(List<Notification> notifications) {
 		BatchPartition<Notification> batches = BatchPartition.of(notifications, BATCH_SIZE);
 
@@ -43,14 +32,14 @@ public class NotificationPublisher {
 			.forEach(batch -> {
 				List<NotificationPayload> payloads = batch.stream()
 					.map(notification -> NotificationPayload.builder()
-						.receiverId(notification.getId())
+						.receiverId(notification.getReceiver().getId())
 						.message(notification.getMessage())
 						.build())
 					.toList();
 
 				try {
 					String jsonPayload = objectMapper.writeValueAsString(payloads);
-					redisTemplate.convertAndSend("notification-channel", jsonPayload);
+					redisTemplate.convertAndSend(REDIS_NOTIFICATION_CHANNEL, jsonPayload);
 				} catch (JsonProcessingException e) {
 					log.error("Failed to serialize payloads", e);
 				}
