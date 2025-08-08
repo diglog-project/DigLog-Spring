@@ -2,16 +2,25 @@ package api.store.diglog.service.notification;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import api.store.diglog.model.dto.notification.NotificationCreateRequest;
+import api.store.diglog.model.dto.notification.NotificationResponse;
+import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.notification.Notification;
+import api.store.diglog.repository.NotificationRepository;
+import api.store.diglog.service.MemberService;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
 
+	private final NotificationRepository notificationRepository;
+	private final MemberService memberService;
 	private final NotificationTransactionService notificationTransactionService;
 	private final NotificationPublisher notificationPublisher;
 
@@ -19,4 +28,14 @@ public class NotificationService {
 		List<Notification> notifications = notificationTransactionService.create(request);
 		notificationPublisher.publish(notifications);
 	}
+
+	public List<NotificationResponse> searchBy(int page, int size) {
+		Member receiver = memberService.getCurrentMember();
+		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+		Page<Notification> notifications = notificationRepository.findAllByReceiver(receiver, pageRequest);
+		return notifications.stream()
+			.map(NotificationResponse::from)
+			.toList();
+	}
+
 }
