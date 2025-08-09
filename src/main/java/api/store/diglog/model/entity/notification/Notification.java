@@ -56,4 +56,7 @@ public class Notification {
 	@CreatedDate
 	private LocalDateTime createdAt;
 
+	public void markAsRead() {
+		this.isRead = true;
+	}
 }

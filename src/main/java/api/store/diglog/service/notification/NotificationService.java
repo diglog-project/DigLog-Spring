@@ -1,6 +1,7 @@
 package api.store.diglog.service.notification;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import api.store.diglog.model.dto.notification.NotificationCreateRequest;
+import api.store.diglog.model.dto.notification.NotificationReadResponse;
 import api.store.diglog.model.dto.notification.NotificationResponse;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.notification.Notification;
@@ -38,4 +40,11 @@ public class NotificationService {
 			.toList();
 	}
 
+	public NotificationReadResponse markAsRead(UUID notificationId) {
+		return notificationTransactionService.markAsRead(notificationId);
+	}
+
+	public List<NotificationReadResponse> markAllAsRead() {
+		return notificationTransactionService.markAllAsRead();
+	}
 }
