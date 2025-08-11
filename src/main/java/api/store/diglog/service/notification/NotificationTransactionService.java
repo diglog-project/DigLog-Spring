@@ -1,11 +1,14 @@
 package api.store.diglog.service.notification;
 
+import static api.store.diglog.common.exception.ErrorCode.*;
+
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.dto.notification.NotificationCreateRequest;
 import api.store.diglog.model.dto.notification.NotificationDeleteRequest;
 import api.store.diglog.model.dto.notification.NotificationDeleteResponse;
@@ -51,7 +54,7 @@ public class NotificationTransactionService {
 	public NotificationReadResponse markAsRead(UUID notificationId) {
 		Member currentMember = memberService.getCurrentMember();
 		Notification notification = notificationRepository.findById(notificationId)
-			.orElseThrow(() -> new IllegalArgumentException("에러"));
+			.orElseThrow(() -> new CustomException(NOTIFICATION_NOT_FOUND));
 
 		validateReceiverCurrentMemberSame(notification.getReceiver(), currentMember);
 
@@ -76,7 +79,7 @@ public class NotificationTransactionService {
 	public void delete(UUID notificationId) {
 		Member currentMember = memberService.getCurrentMember();
 		Notification notification = notificationRepository.findById(notificationId)
-			.orElseThrow(() -> new IllegalArgumentException("에러 처리"));
+			.orElseThrow(() -> new CustomException(NOTIFICATION_NOT_FOUND));
 
 		validateReceiverCurrentMemberSame(notification.getReceiver(), currentMember);
 
@@ -97,7 +100,7 @@ public class NotificationTransactionService {
 
 	private void validateReceiverCurrentMemberSame(Member receiver, Member currentMember) {
 		if (receiver.isDifferent(currentMember)) {
-			throw new IllegalArgumentException("에러 처리");
+			throw new CustomException(NOTIFICATION_NO_PERMISSION);
 		}
 	}
 

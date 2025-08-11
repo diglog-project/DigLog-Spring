@@ -70,7 +70,10 @@ public enum ErrorCode {
 
 	// Notification
 	NOTIFICATION_INVALID_NOTIFICATION_TYPE(BAD_REQUEST, "지원하지 않는 알림 타입입니다."),
-	NOTIFICATION_SELF_COMMENT(BAD_REQUEST, "게시글과 댓글의 작성자가 일치하는 경우엔 알림이 생성되지 않습니다.");
+	NOTIFICATION_SELF_COMMENT(BAD_REQUEST, "게시글과 댓글의 작성자가 일치하는 경우엔 알림이 생성되지 않습니다."),
+	NOTIFICATION_NOT_FOUND(BAD_REQUEST, "해당 알림을 찾을 수 없습니다."),
+	NOTIFICATION_NO_PERMISSION(FORBIDDEN, "해당 알림의 변경 권한이 없습니다.")
+	;
 
 	private final HttpStatus status;
 	private final String message;
