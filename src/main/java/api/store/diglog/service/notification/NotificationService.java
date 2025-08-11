@@ -9,6 +9,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import api.store.diglog.model.dto.notification.NotificationCreateRequest;
+import api.store.diglog.model.dto.notification.NotificationDeleteRequest;
+import api.store.diglog.model.dto.notification.NotificationDeleteResponse;
 import api.store.diglog.model.dto.notification.NotificationReadResponse;
 import api.store.diglog.model.dto.notification.NotificationResponse;
 import api.store.diglog.model.entity.Member;
@@ -46,5 +48,13 @@ public class NotificationService {
 
 	public List<NotificationReadResponse> markAllAsRead() {
 		return notificationTransactionService.markAllAsRead();
+	}
+
+	public void delete(UUID notificationId) {
+		notificationTransactionService.delete(notificationId);
+	}
+
+	public NotificationDeleteResponse deleteAll(NotificationDeleteRequest request) {
+		return notificationTransactionService.deleteAll(request);
 	}
 }

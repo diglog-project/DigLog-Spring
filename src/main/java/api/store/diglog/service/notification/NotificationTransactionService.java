@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.model.dto.notification.NotificationCreateRequest;
+import api.store.diglog.model.dto.notification.NotificationDeleteRequest;
+import api.store.diglog.model.dto.notification.NotificationDeleteResponse;
 import api.store.diglog.model.dto.notification.NotificationReadResponse;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.notification.Notification;
@@ -70,9 +72,33 @@ public class NotificationTransactionService {
 			.toList();
 	}
 
+	@Transactional
+	public void delete(UUID notificationId) {
+		Member currentMember = memberService.getCurrentMember();
+		Notification notification = notificationRepository.findById(notificationId)
+			.orElseThrow(() -> new IllegalArgumentException("에러 처리"));
+
+		validateReceiverCurrentMemberSame(notification.getReceiver(), currentMember);
+
+		notificationRepository.delete(notification);
+	}
+
+	@Transactional
+	public NotificationDeleteResponse deleteAll(NotificationDeleteRequest request) {
+		Member currentMember = memberService.getCurrentMember();
+		List<Notification> notifications = notificationRepository.findAllById(request.getNotificationIds());
+
+		notifications.forEach(notification ->
+			validateReceiverCurrentMemberSame(notification.getReceiver(), currentMember));
+
+		notificationRepository.deleteAllInBatch(notifications);
+		return NotificationDeleteResponse.of(request.getNotificationIds().size(), notifications.size());
+	}
+
 	private void validateReceiverCurrentMemberSame(Member receiver, Member currentMember) {
 		if (receiver.isDifferent(currentMember)) {
 			throw new IllegalArgumentException("에러 처리");
 		}
 	}
+
 }

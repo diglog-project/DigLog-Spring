@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import api.store.diglog.model.dto.notification.NotificationCreateRequest;
+import api.store.diglog.model.dto.notification.NotificationDeleteRequest;
+import api.store.diglog.model.dto.notification.NotificationDeleteResponse;
 import api.store.diglog.model.dto.notification.NotificationReadResponse;
 import api.store.diglog.model.dto.notification.NotificationResponse;
 import api.store.diglog.service.SseEmitterService;
@@ -59,5 +62,17 @@ public class NotificationController {
 	public ResponseEntity<List<NotificationReadResponse>> markAllAsRead() {
 		List<NotificationReadResponse> responses = notificationService.markAllAsRead();
 		return ResponseEntity.ok().body(responses);
+	}
+
+	@DeleteMapping("/{notificationId}")
+	public ResponseEntity<Void> delete(@PathVariable("notificationId") UUID notificationId) {
+		notificationService.delete(notificationId);
+		return ResponseEntity.noContent().build();
+	}
+
+	@DeleteMapping
+	public ResponseEntity<NotificationDeleteResponse> deleteAll(@RequestBody NotificationDeleteRequest request) {
+		NotificationDeleteResponse response = notificationService.deleteAll(request);
+		return ResponseEntity.ok().body(response);
 	}
 }
