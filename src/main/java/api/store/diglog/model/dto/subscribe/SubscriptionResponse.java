@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 public class SubscriptionResponse {
 
 	private UUID subscriptionId;
-	private UUID authorId;
 	private String authorUsername;
 	private boolean notificationEnabled;
 	private LocalDateTime createdAt;
@@ -25,7 +24,6 @@ public class SubscriptionResponse {
 	public static SubscriptionResponse from(Subscription subscription) {
 		return SubscriptionResponse.builder()
 			.subscriptionId(subscription.getId())
-			.authorId(subscription.getAuthor().getId())
 			.authorUsername(subscription.getAuthor().getUsername())
 			.notificationEnabled(subscription.isNotificationEnabled())
 			.createdAt(subscription.getCreatedAt())

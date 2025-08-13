@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class SubscriptionCreateRequest {
 
 	@NotNull(message = "구독 대상자를 지정해주세요")
-	private UUID authorId;
+	private String authorName;
 
 	@NotNull(message = "알림 여부를 설정해주세요")
 	private Boolean notificationEnabled;

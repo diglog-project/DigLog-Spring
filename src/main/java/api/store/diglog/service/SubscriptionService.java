@@ -55,7 +55,7 @@ public class SubscriptionService {
 
 	@Transactional
 	public SubscriptionCreateResponse create(SubscriptionCreateRequest subscriptionCreateRequest) {
-		Member author = memberService.findMemberById(subscriptionCreateRequest.getAuthorId());
+		Member author = memberService.findActiveMemberByUsername(subscriptionCreateRequest.getAuthorName());
 		Member subscriber = memberService.getCurrentMember();
 
 		validateActiveAuthor(author);
@@ -72,9 +72,7 @@ public class SubscriptionService {
 		Subscription savedSubscription = subscriptionRepository.save(subscription);
 
 		return SubscriptionCreateResponse.builder()
-			.authorId(author.getId())
 			.authorNickname(author.getUsername())
-			.subscriberId(subscriber.getId())
 			.subscriberNickname(subscriber.getUsername())
 			.notificationEnabled(savedSubscription.isNotificationEnabled())
 			.createdAt(savedSubscription.getCreatedAt())

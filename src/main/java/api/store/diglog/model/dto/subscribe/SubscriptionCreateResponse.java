@@ -15,9 +15,7 @@ import lombok.NoArgsConstructor;
 @Getter
 public class SubscriptionCreateResponse {
 
-	private UUID authorId;
 	private String authorNickname;
-	private UUID subscriberId;
 	private String subscriberNickname;
 	private boolean notificationEnabled;
 	private LocalDateTime createdAt;
