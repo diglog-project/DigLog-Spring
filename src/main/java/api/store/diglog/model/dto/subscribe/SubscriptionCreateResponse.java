@@ -1,7 +1,6 @@
 package api.store.diglog.model.dto.subscribe;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
