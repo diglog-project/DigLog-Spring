@@ -32,4 +32,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
 	@EntityGraph(attributePaths = "subscriber")
 	List<Subscription> findAllByAuthorAndSubscriberIsDeletedFalse(Member author);
 
+	boolean existsBySubscriberAndAuthor(Member subscriber, Member author);
+
 }

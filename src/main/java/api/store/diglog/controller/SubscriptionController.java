@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import api.store.diglog.model.dto.subscribe.SubscriberResponse;
 import api.store.diglog.model.dto.subscribe.SubscriptionCreateRequest;
 import api.store.diglog.model.dto.subscribe.SubscriptionCreateResponse;
+import api.store.diglog.model.dto.subscribe.SubscriptionExistsResponse;
 import api.store.diglog.model.dto.subscribe.SubscriptionNotificationActivationRequest;
 import api.store.diglog.model.dto.subscribe.SubscriptionResponse;
 import api.store.diglog.service.SubscriptionService;
@@ -48,6 +49,14 @@ public class SubscriptionController {
 	) {
 		Page<SubscriberResponse> response = subscriptionService.getAuthorSubscribers(authorName, page, size);
 		return ResponseEntity.ok().body(response);
+	}
+
+	@GetMapping("/current-member/authors/{authorName}")
+	public ResponseEntity<SubscriptionExistsResponse> checkSubscription(
+		@PathVariable("authorName") String authorName
+	) {
+		SubscriptionExistsResponse subscriptionExistsResponse = subscriptionService.checkSubscription(authorName);
+		return ResponseEntity.ok().body(subscriptionExistsResponse);
 	}
 
 	@PostMapping

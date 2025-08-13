@@ -14,6 +14,7 @@ import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.dto.subscribe.SubscriberResponse;
 import api.store.diglog.model.dto.subscribe.SubscriptionCreateRequest;
 import api.store.diglog.model.dto.subscribe.SubscriptionCreateResponse;
+import api.store.diglog.model.dto.subscribe.SubscriptionExistsResponse;
 import api.store.diglog.model.dto.subscribe.SubscriptionNotificationActivationRequest;
 import api.store.diglog.model.dto.subscribe.SubscriptionResponse;
 import api.store.diglog.model.entity.Member;
@@ -43,6 +44,13 @@ public class SubscriptionService {
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 		return subscriptionRepository.findAllByAuthorAndSubscriberIsDeletedFalse(author, pageRequest)
 			.map(SubscriberResponse::from);
+	}
+
+	public SubscriptionExistsResponse checkSubscription(String authorName) {
+		Member subscriber = memberService.getCurrentMember();
+		Member author = memberService.findActiveMemberByUsername(authorName);
+		boolean hasSubscription = subscriptionRepository.existsBySubscriberAndAuthor(subscriber, author);
+		return SubscriptionExistsResponse.of(hasSubscription);
 	}
 
 	@Transactional
