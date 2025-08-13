@@ -49,8 +49,10 @@ public class SubscriptionService {
 	public SubscriptionExistsResponse checkSubscription(String authorName) {
 		Member subscriber = memberService.getCurrentMember();
 		Member author = memberService.findActiveMemberByUsername(authorName);
-		boolean hasSubscription = subscriptionRepository.existsBySubscriberAndAuthor(subscriber, author);
-		return SubscriptionExistsResponse.of(hasSubscription);
+
+		return subscriptionRepository.findByAuthorAndSubscriber(author, subscriber)
+			.map(subscription -> SubscriptionExistsResponse.of(subscription.getId(), true))
+			.orElse(SubscriptionExistsResponse.of(null, false));
 	}
 
 	@Transactional

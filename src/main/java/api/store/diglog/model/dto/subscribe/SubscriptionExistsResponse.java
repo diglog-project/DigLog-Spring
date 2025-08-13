@@ -1,5 +1,7 @@
 package api.store.diglog.model.dto.subscribe;
 
+import java.util.UUID;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,10 +14,12 @@ import lombok.NoArgsConstructor;
 @Getter
 public class SubscriptionExistsResponse {
 
+	private UUID subscriptionId;
 	private boolean hasSubscription;
 
-	public static SubscriptionExistsResponse of(boolean hasSubscription) {
+	public static SubscriptionExistsResponse of(UUID subscriptionId, boolean hasSubscription) {
 		return SubscriptionExistsResponse.builder()
+			.subscriptionId(subscriptionId)
 			.hasSubscription(hasSubscription)
 			.build();
 	}
