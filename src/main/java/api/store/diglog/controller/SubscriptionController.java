@@ -30,23 +30,23 @@ public class SubscriptionController {
 
 	private final SubscriptionService subscriptionService;
 
-	@GetMapping("/users/{userId}")
+	@GetMapping("/users/{username}")
 	public ResponseEntity<Page<SubscriptionResponse>> getUserSubscriptions(
-		@PathVariable("userId") UUID userId,
+		@PathVariable("username") String username,
 		@RequestParam(name = "page", defaultValue = "0") int page,
 		@RequestParam(name = "size", defaultValue = "20") int size
 	) {
-		Page<SubscriptionResponse> response = subscriptionService.getUserSubscriptions(userId, page, size);
+		Page<SubscriptionResponse> response = subscriptionService.getUserSubscriptions(username, page, size);
 		return ResponseEntity.ok().body(response);
 	}
 
-	@GetMapping("/authors/{authorId}")
+	@GetMapping("/authors/{authorName}")
 	public ResponseEntity<Page<SubscriberResponse>> getAuthorSubscribers(
-		@PathVariable("authorId") UUID authorId,
+		@PathVariable("authorName") String authorName,
 		@RequestParam(name = "page", defaultValue = "0") int page,
 		@RequestParam(name = "size", defaultValue = "20") int size
 	) {
-		Page<SubscriberResponse> response = subscriptionService.getAuthorSubscribers(authorId, page, size);
+		Page<SubscriberResponse> response = subscriptionService.getAuthorSubscribers(authorName, page, size);
 		return ResponseEntity.ok().body(response);
 	}
 

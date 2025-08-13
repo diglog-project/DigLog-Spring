@@ -31,15 +31,15 @@ public class SubscriptionService {
 	private final SubscriptionRepository subscriptionRepository;
 	private final MemberService memberService;
 
-	public Page<SubscriptionResponse> getUserSubscriptions(UUID userId, int page, int size) {
-		Member user = memberService.findActiveMemberById(userId);
+	public Page<SubscriptionResponse> getUserSubscriptions(String userName, int page, int size) {
+		Member user = memberService.findActiveMemberByUsername(userName);
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 		return subscriptionRepository.findAllBySubscriberAndAuthorIsDeletedFalse(user, pageRequest)
 			.map(SubscriptionResponse::from);
 	}
 
-	public Page<SubscriberResponse> getAuthorSubscribers(UUID authorId, int page, int size) {
-		Member author = memberService.findActiveMemberById(authorId);
+	public Page<SubscriberResponse> getAuthorSubscribers(String authorName, int page, int size) {
+		Member author = memberService.findActiveMemberByUsername(authorName);
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 		return subscriptionRepository.findAllByAuthorAndSubscriberIsDeletedFalse(author, pageRequest)
 			.map(SubscriberResponse::from);
