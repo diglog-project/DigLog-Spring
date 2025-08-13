@@ -2,7 +2,6 @@ package api.store.diglog.service;
 
 import static api.store.diglog.common.exception.ErrorCode.*;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -32,22 +31,18 @@ public class SubscriptionService {
 	private final SubscriptionRepository subscriptionRepository;
 	private final MemberService memberService;
 
-	public List<SubscriptionResponse> getUserSubscriptions(UUID userId, int page, int size) {
+	public Page<SubscriptionResponse> getUserSubscriptions(UUID userId, int page, int size) {
 		Member user = memberService.findActiveMemberById(userId);
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
-		Page<Subscription> findSubscription =
-			subscriptionRepository.findAllBySubscriberAndAuthorIsDeletedFalse(user, pageRequest);
-		return findSubscription.map(SubscriptionResponse::from)
-			.toList();
+		return subscriptionRepository.findAllBySubscriberAndAuthorIsDeletedFalse(user, pageRequest)
+			.map(SubscriptionResponse::from);
 	}
 
-	public List<SubscriberResponse> getAuthorSubscribers(UUID authorId, int page, int size) {
+	public Page<SubscriberResponse> getAuthorSubscribers(UUID authorId, int page, int size) {
 		Member author = memberService.findActiveMemberById(authorId);
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
-		Page<Subscription> findSubscription =
-			subscriptionRepository.findAllByAuthorAndSubscriberIsDeletedFalse(author, pageRequest);
-		return findSubscription.map(SubscriberResponse::from)
-			.toList();
+		return subscriptionRepository.findAllByAuthorAndSubscriberIsDeletedFalse(author, pageRequest)
+			.map(SubscriberResponse::from);
 	}
 
 	@Transactional

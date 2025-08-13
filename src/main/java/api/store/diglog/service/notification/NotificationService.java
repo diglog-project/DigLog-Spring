@@ -33,13 +33,11 @@ public class NotificationService {
 		notificationPublisher.publish(notifications);
 	}
 
-	public List<NotificationResponse> searchBy(int page, int size) {
+	public Page<NotificationResponse> searchBy(int page, int size) {
 		Member receiver = memberService.getCurrentMember();
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
-		Page<Notification> notifications = notificationRepository.findAllByReceiver(receiver, pageRequest);
-		return notifications.stream()
-			.map(NotificationResponse::from)
-			.toList();
+		return notificationRepository.findAllByReceiver(receiver, pageRequest)
+			.map(NotificationResponse::from);
 	}
 
 	public NotificationReadResponse markAsRead(UUID notificationId) {

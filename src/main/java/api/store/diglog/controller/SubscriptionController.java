@@ -1,8 +1,8 @@
 package api.store.diglog.controller;
 
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,23 +31,23 @@ public class SubscriptionController {
 	private final SubscriptionService subscriptionService;
 
 	@GetMapping("/users/{userId}")
-	public ResponseEntity<List<SubscriptionResponse>> getUserSubscriptions(
+	public ResponseEntity<Page<SubscriptionResponse>> getUserSubscriptions(
 		@PathVariable("userId") UUID userId,
 		@RequestParam(name = "page", defaultValue = "0") int page,
 		@RequestParam(name = "size", defaultValue = "20") int size
 	) {
-		List<SubscriptionResponse> responses = subscriptionService.getUserSubscriptions(userId, page, size);
-		return ResponseEntity.ok().body(responses);
+		Page<SubscriptionResponse> response = subscriptionService.getUserSubscriptions(userId, page, size);
+		return ResponseEntity.ok().body(response);
 	}
 
 	@GetMapping("/authors/{authorId}")
-	public ResponseEntity<List<SubscriberResponse>> getAuthorSubscribers(
+	public ResponseEntity<Page<SubscriberResponse>> getAuthorSubscribers(
 		@PathVariable("authorId") UUID authorId,
 		@RequestParam(name = "page", defaultValue = "0") int page,
 		@RequestParam(name = "size", defaultValue = "20") int size
 	) {
-		List<SubscriberResponse> responses = subscriptionService.getAuthorSubscribers(authorId, page, size);
-		return ResponseEntity.ok().body(responses);
+		Page<SubscriberResponse> response = subscriptionService.getAuthorSubscribers(authorId, page, size);
+		return ResponseEntity.ok().body(response);
 	}
 
 	@PostMapping

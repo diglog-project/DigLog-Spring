@@ -3,6 +3,7 @@ package api.store.diglog.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,11 +39,11 @@ public class NotificationController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<NotificationResponse>> search(
+	public ResponseEntity<Page<NotificationResponse>> search(
 		@RequestParam(name = "page", defaultValue = "0") int page,
 		@RequestParam(name = "size", defaultValue = "20") int size
 	) {
-		List<NotificationResponse> responses = notificationService.searchBy(page, size);
+		Page<NotificationResponse> responses = notificationService.searchBy(page, size);
 		return ResponseEntity.ok().body(responses);
 	}
 
