@@ -33,9 +33,9 @@ public class NotificationController {
 	private final SseEmitterService sseEmitterService;
 	private final NotificationService notificationService;
 
-	@GetMapping(value = "/sse/subscribe/{userId}", produces = "text/event-stream")
-	public SseEmitter subscribe(@PathVariable("userId") UUID userId) {
-		return sseEmitterService.subscribe(userId);
+	@GetMapping(value = "/sse/subscribe/", produces = "text/event-stream")
+	public SseEmitter subscribe() {
+		return sseEmitterService.subscribe();
 	}
 
 	@GetMapping

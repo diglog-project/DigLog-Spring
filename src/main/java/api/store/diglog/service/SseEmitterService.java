@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import api.store.diglog.model.entity.Member;
 import api.store.diglog.repository.SseEmitterRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -18,8 +19,11 @@ public class SseEmitterService {
 	private static final String NOTIFICATION_EVENT_NAME = "notify";
 
 	private final SseEmitterRepository sseEmitterRepository;
+	private final MemberService memberService;
 
-	public SseEmitter subscribe(UUID userId) {
+	public SseEmitter subscribe() {
+		Member currentMember = memberService.getCurrentMember();
+		UUID userId = currentMember.getId();
 		SseEmitter sseEmitter = new SseEmitter(DEFAULT_TIMEOUT);
 		sseEmitterRepository.save(userId, sseEmitter);
 
