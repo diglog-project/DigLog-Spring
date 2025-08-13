@@ -33,7 +33,7 @@ public class NotificationController {
 	private final SseEmitterService sseEmitterService;
 	private final NotificationService notificationService;
 
-	@GetMapping(value = "/sse/subscribe/", produces = "text/event-stream")
+	@GetMapping(value = "/sse/subscribe", produces = "text/event-stream")
 	public SseEmitter subscribe() {
 		return sseEmitterService.subscribe();
 	}
