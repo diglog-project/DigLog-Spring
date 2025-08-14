@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.common.util.BatchPartition;
 import api.store.diglog.model.constant.SearchOption;
+import api.store.diglog.model.dto.post.PostCreateResponse;
 import api.store.diglog.model.dto.post.PostFolderUpdateRequest;
 import api.store.diglog.model.dto.post.PostListMemberRequest;
 import api.store.diglog.model.dto.post.PostListMemberTagRequest;
@@ -66,7 +67,7 @@ public class PostService {
 	private final RedisPostViewLoader redisPostViewLoader;
 
 	@Transactional
-	public void save(PostRequest postRequest) {
+	public PostCreateResponse save(PostRequest postRequest) {
 		Member member = memberService.getCurrentMember();
 		List<Tag> tags = saveNewTags(postRequest.getTagNames());
 		Folder folder = folderService.getFolderByIdAndMemberId(postRequest.getFolderId(), member.getId());
@@ -85,6 +86,10 @@ public class PostService {
 			.urls(postRequest.getUrls())
 			.build();
 		imageService.savePostImage(imagePostVO);
+
+		return PostCreateResponse.builder()
+			.id(savedPost.getId())
+			.build();
 	}
 
 	@Transactional
