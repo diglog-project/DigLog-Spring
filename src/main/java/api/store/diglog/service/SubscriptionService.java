@@ -118,7 +118,7 @@ public class SubscriptionService {
 
 	private void validateSelfSubscription(Member author, Member subscriber) {
 		if (author.getId().equals(subscriber.getId())) {
-			throw new CustomException(SUBSCRIPTION_SELF_SUBSCRIPTION);
+			throw new CustomException(SUBSCRIPTION_ALREADY_SUBSCRIBED);
 		}
 	}
 
