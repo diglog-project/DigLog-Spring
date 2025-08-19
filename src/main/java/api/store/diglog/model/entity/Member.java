@@ -98,11 +98,11 @@ public class Member {
 			return true;
 		if (!(o instanceof Member other))
 			return false;
-		return Objects.equals(this.id, other.id);
+		return this.id != null && this.id.equals(other.id);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id);
+		return (id != null) ? id.hashCode() : System.identityHashCode(this);
 	}
 }
