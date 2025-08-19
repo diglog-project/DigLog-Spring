@@ -33,12 +33,18 @@ public class NotificationSubscriber implements MessageListener {
 				}
 			);
 
-			payloads.forEach(payload ->
-				sseEmitterService.send(payload.getReceiverId(), payload.getMessage())
-			);
+			payloads.forEach(this::sendMessage);
 
 		} catch (Exception e) {
 			log.error("Failed to process notification payload", e);
+		}
+	}
+
+	private void sendMessage(NotificationPayload payload) {
+		try {
+			sseEmitterService.send(payload.getReceiverId(), payload.getMessage());
+		} catch (Exception ex) {
+			log.warn("Failed to deliver notification to receiverId={}", payload.getReceiverId(), ex);
 		}
 	}
 
