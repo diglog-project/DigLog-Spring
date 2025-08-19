@@ -1,11 +1,17 @@
-language: "ko"
+language: ko-KR
+
+early_access: true
 reviews:
   auto_review:
     enabled: true
     drafts: false
+  review_status: true
   profile: "chill" # assertive, chill, pythonic 중 선택
   request_changes_workflow: false
   high_level_summary: true
+  high_level_summary_placeholder: '@coderabbitai 요약'
+  auto_title_placeholder: '@coderabbitai'
+  collapse_walkthrough: false
 
 chat:
   auto_reply: true
