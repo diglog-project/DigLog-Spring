@@ -23,6 +23,7 @@ import api.store.diglog.model.dto.notification.NotificationReadResponse;
 import api.store.diglog.model.dto.notification.NotificationResponse;
 import api.store.diglog.service.SseEmitterService;
 import api.store.diglog.service.notification.NotificationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -48,7 +49,7 @@ public class NotificationController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Void> create(@RequestBody NotificationCreateRequest request) {
+	public ResponseEntity<Void> create(@RequestBody @Valid NotificationCreateRequest request) {
 		notificationService.createAndPublish(request);
 		return ResponseEntity.noContent().build();
 	}
@@ -72,7 +73,7 @@ public class NotificationController {
 	}
 
 	@DeleteMapping
-	public ResponseEntity<NotificationDeleteResponse> deleteAll(@RequestBody NotificationDeleteRequest request) {
+	public ResponseEntity<NotificationDeleteResponse> deleteAll(@RequestBody @Valid NotificationDeleteRequest request) {
 		NotificationDeleteResponse response = notificationService.deleteAll(request);
 		return ResponseEntity.ok().body(response);
 	}
