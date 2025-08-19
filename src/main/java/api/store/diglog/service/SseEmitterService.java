@@ -28,8 +28,14 @@ public class SseEmitterService {
 		sseEmitterRepository.save(userId, sseEmitter);
 
 		sseEmitter.onCompletion(() -> sseEmitterRepository.deleteBy(userId, sseEmitter));
-		sseEmitter.onTimeout(() -> sseEmitterRepository.deleteBy(userId, sseEmitter));
-		sseEmitter.onError(error -> sseEmitterRepository.deleteBy(userId, sseEmitter));
+		sseEmitter.onTimeout(() -> {
+			sseEmitterRepository.deleteBy(userId, sseEmitter);
+			sseEmitter.complete();
+		});
+		sseEmitter.onError(error -> {
+			sseEmitterRepository.deleteBy(userId, sseEmitter);
+			sseEmitter.completeWithError(error);
+		});
 
 		return sseEmitter;
 	}
@@ -46,7 +52,7 @@ public class SseEmitterService {
 					.name(NOTIFICATION_EVENT_NAME)
 					.data(message)
 				);
-			} catch (IOException e) {
+			} catch (IOException | IllegalStateException e) {
 				sseEmitterRepository.deleteBy(userId, sseEmitter);
 				sseEmitter.completeWithError(e);
 			}
