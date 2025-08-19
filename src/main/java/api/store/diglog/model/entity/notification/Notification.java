@@ -40,10 +40,11 @@ public class Notification {
 	@Id
 	private UUID id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "receiver_id")
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "receiver_id", nullable = false)
 	private Member receiver;
 
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private NotificationType notificationType;
 
