@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import api.store.diglog.model.dto.post.PostCreateResponse;
 import api.store.diglog.model.dto.post.PostFolderUpdateRequest;
 import api.store.diglog.model.dto.post.PostListMemberRequest;
 import api.store.diglog.model.dto.post.PostListMemberTagRequest;
@@ -26,6 +27,7 @@ import api.store.diglog.model.dto.post.PostViewResponse;
 import api.store.diglog.service.post.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import software.amazon.awssdk.http.HttpStatusCode;
 
 @RestController
 @RequestMapping("/api/post")
@@ -35,10 +37,10 @@ public class PostController {
 	private final PostService postService;
 
 	@PostMapping
-	public ResponseEntity<Void> save(@RequestBody PostRequest postRequest) {
-		postService.save(postRequest);
+	public ResponseEntity<PostCreateResponse> save(@RequestBody PostRequest postRequest) {
+		PostCreateResponse postCreateResponse = postService.save(postRequest);
 
-		return ResponseEntity.ok().build();
+		return ResponseEntity.status(HttpStatusCode.CREATED).body(postCreateResponse);
 	}
 
 	@PatchMapping
