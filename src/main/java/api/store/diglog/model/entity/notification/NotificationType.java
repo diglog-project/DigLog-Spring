@@ -1,6 +1,6 @@
 package api.store.diglog.model.entity.notification;
 
-import java.util.Arrays;
+import java.util.Locale;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +16,14 @@ public enum NotificationType {
 	private final String description;
 
 	public static NotificationType from(String type) {
-		return Arrays.stream(NotificationType.values())
-			.filter(notificationType -> notificationType.name().equals(type))
-			.findFirst()
-			.orElse(INVALID);
+		if (type == null || type.isBlank()) {
+			return INVALID;
+		}
+
+		try {
+			return NotificationType.valueOf(type.trim().toUpperCase(Locale.ROOT));
+		} catch (IllegalArgumentException exception) {
+			return INVALID;
+		}
 	}
 }
