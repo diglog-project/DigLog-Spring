@@ -74,8 +74,8 @@ public class SubscriptionService {
 		Subscription savedSubscription = subscriptionRepository.save(subscription);
 
 		return SubscriptionCreateResponse.builder()
-			.authorNickname(author.getUsername())
-			.subscriberNickname(subscriber.getUsername())
+			.authorName(author.getUsername())
+			.subscriberName(subscriber.getUsername())
 			.notificationEnabled(savedSubscription.isNotificationEnabled())
 			.createdAt(savedSubscription.getCreatedAt())
 			.build();
