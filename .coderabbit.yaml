@@ -5,6 +5,10 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
+    base_branches:
+      - "main"
+      - "master"
+      - "develop"
   review_status: true
   profile: "chill" # assertive, chill, pythonic 중 선택
   request_changes_workflow: false
