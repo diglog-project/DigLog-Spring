@@ -118,14 +118,14 @@ public class SubscriptionService {
 
 	private void validateSelfSubscription(Member author, Member subscriber) {
 		if (author.getId().equals(subscriber.getId())) {
-			throw new CustomException(SUBSCRIPTION_ALREADY_SUBSCRIBED);
+			throw new CustomException(SUBSCRIPTION_SELF_SUBSCRIBED);
 		}
 	}
 
 	private void validateAlreadySubscribed(Member author, Member subscriber) {
 		subscriptionRepository.findByAuthorAndSubscriber(author, subscriber)
 			.ifPresent(subscription -> {
-				throw new CustomException(SUBSCRIPTION_ALREADY_SUBSCRIPTION);
+				throw new CustomException(SUBSCRIPTION_ALREADY_SUBSCRIBED);
 			});
 	}
 
