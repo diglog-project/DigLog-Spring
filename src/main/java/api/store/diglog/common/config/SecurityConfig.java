@@ -52,7 +52,7 @@ public class SecurityConfig {
 		String[] commentGetApi = {"/api/comment"};
 		String[] folderGetApi = {"/api/folders/**"};
 		String[] tagGetApi = {"/api/tag/**"};
-		String[] subscribeGetApi = {"/api/subscriptions/**"};
+		String[] subscribeGetApi = {"/api/subscriptions/users/**", "/api/subscriptions/authors/**"};
 
 		http
 			.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
