@@ -38,47 +38,25 @@ class SubscriptionRepositoryTest {
 	@Test
 	void findByIdFetchSubscriber() {
 		// given
-		Member frod = Member.builder()
-			.email("frod@gmail.com")
-			.username("frod")
-			.password("frodPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member roy = Member.builder()
-			.email("roy@gmail.com")
-			.username("roy")
-			.password("royPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
+		Member frod = createMember("frod", false);
+		Member roy = createMember("roy", false);
 		memberRepository.saveAll(asList(frod, roy));
 
-		Subscription royFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		subscriptionRepository.save(royFrodsubscription);
+		Subscription royFrodSubscription = createSubscription(roy, frod);
+		subscriptionRepository.save(royFrodSubscription);
 
 		// when
-		Subscription subscription = subscriptionRepository.findByIdFetchSubscriber(royFrodsubscription.getId())
+		Subscription subscription = subscriptionRepository.findByIdFetchSubscriber(royFrodSubscription.getId())
 			.get();
 
 		// then
 		assertThat(subscription).extracting(
 			"id", "author", "subscriber", "notificationEnabled"
 		).containsExactly(
-			royFrodsubscription.getId(),
-			royFrodsubscription.getAuthor(),
-			royFrodsubscription.getSubscriber(),
-			royFrodsubscription.isNotificationEnabled()
+			royFrodSubscription.getId(),
+			royFrodSubscription.getAuthor(),
+			royFrodSubscription.getSubscriber(),
+			royFrodSubscription.isNotificationEnabled()
 		);
 	}
 
@@ -86,34 +64,12 @@ class SubscriptionRepositoryTest {
 	@Test
 	void findByAuthorAndSubscriber() {
 		// given
-		Member frod = Member.builder()
-			.email("frod@gmail.com")
-			.username("frod")
-			.password("frodPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member roy = Member.builder()
-			.email("roy@gmail.com")
-			.username("roy")
-			.password("royPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
+		Member frod = createMember("frod", false);
+		Member roy = createMember("roy", false);
 		memberRepository.saveAll(asList(frod, roy));
 
-		Subscription royFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		subscriptionRepository.save(royFrodsubscription);
+		Subscription royFrodSubscription = createSubscription(roy, frod);
+		subscriptionRepository.save(royFrodSubscription);
 
 		// when
 		Subscription subscription = subscriptionRepository.findByAuthorAndSubscriber(roy, frod)
@@ -123,67 +79,25 @@ class SubscriptionRepositoryTest {
 		assertThat(subscription).extracting(
 			"id", "author", "subscriber", "notificationEnabled"
 		).containsExactly(
-			royFrodsubscription.getId(),
-			royFrodsubscription.getAuthor(),
-			royFrodsubscription.getSubscriber(),
-			royFrodsubscription.isNotificationEnabled()
+			royFrodSubscription.getId(),
+			royFrodSubscription.getAuthor(),
+			royFrodSubscription.getSubscriber(),
+			royFrodSubscription.isNotificationEnabled()
 		);
 	}
 
 	@DisplayName("구독자의 구독 수를 조회할 수 있다.")
 	@Test
 	void countBySubscriber() {
-		Member frod = Member.builder()
-			.email("frod@gmail.com")
-			.username("frod")
-			.password("frodPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member roy = Member.builder()
-			.email("roy@gmail.com")
-			.username("roy")
-			.password("royPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member hana = Member.builder()
-			.email("hana@gmail.com")
-			.username("hana")
-			.password("hanaPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
+		Member frod = createMember("frod", false);
+		Member roy = createMember("roy", false);
+		Member hana = createMember("hana", false);
 		memberRepository.saveAll(asList(frod, roy, hana));
 
-		Subscription royFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription hanaFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(hana)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription royHanasubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(hana)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		subscriptionRepository.saveAll(asList(royFrodsubscription, hanaFrodsubscription, royHanasubscription));
+		Subscription royFrodSubscription = createSubscription(roy, frod);
+		Subscription hanaFrodSubscription = createSubscription(hana, frod);
+		Subscription royHanaSubscription = createSubscription(roy, hana);
+		subscriptionRepository.saveAll(asList(royFrodSubscription, hanaFrodSubscription, royHanaSubscription));
 
 		// when
 		long subscriptionCount = subscriptionRepository.countBySubscriber(frod);
@@ -197,57 +111,15 @@ class SubscriptionRepositoryTest {
 	@Test
 	void findAllBySubscriberAndAuthorIsDeletedFalse() {
 		// given
-		Member frod = Member.builder()
-			.email("frod@gmail.com")
-			.username("frod")
-			.password("frodPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member roy = Member.builder()
-			.email("roy@gmail.com")
-			.username("roy")
-			.password("royPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member hana = Member.builder()
-			.email("hana@gmail.com")
-			.username("hana")
-			.password("hanaPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
+		Member frod = createMember("frod", false);
+		Member roy = createMember("roy", false);
+		Member hana = createMember("hana", false);
 		memberRepository.saveAll(asList(frod, roy, hana));
 
-		Subscription royFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription hanaFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(hana)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription royHanasubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(hana)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		subscriptionRepository.saveAll(asList(royFrodsubscription, hanaFrodsubscription, royHanasubscription));
+		Subscription royFrodSubscription = createSubscription(roy, frod);
+		Subscription hanaFrodSubscription = createSubscription(hana, frod);
+		Subscription royHanaSubscription = createSubscription(roy, hana);
+		subscriptionRepository.saveAll(asList(royFrodSubscription, hanaFrodSubscription, royHanaSubscription));
 
 		PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("createdAt").descending());
 
@@ -261,16 +133,16 @@ class SubscriptionRepositoryTest {
 			.extracting("id", "author", "subscriber", "notificationEnabled")
 			.contains(
 				tuple(
-					royFrodsubscription.getId(),
-					royFrodsubscription.getAuthor(),
-					royFrodsubscription.getSubscriber(),
-					royFrodsubscription.isNotificationEnabled()
+					royFrodSubscription.getId(),
+					royFrodSubscription.getAuthor(),
+					royFrodSubscription.getSubscriber(),
+					royFrodSubscription.isNotificationEnabled()
 				),
 				tuple(
-					hanaFrodsubscription.getId(),
-					hanaFrodsubscription.getAuthor(),
-					hanaFrodsubscription.getSubscriber(),
-					hanaFrodsubscription.isNotificationEnabled()
+					hanaFrodSubscription.getId(),
+					hanaFrodSubscription.getAuthor(),
+					hanaFrodSubscription.getSubscriber(),
+					hanaFrodSubscription.isNotificationEnabled()
 				)
 			);
 	}
@@ -279,58 +151,15 @@ class SubscriptionRepositoryTest {
 	@Test
 	void findAllBySubscriberAndAuthorIsDeletedFalse_WithDeletedMember() {
 		// given
-		Member frod = Member.builder()
-			.email("frod@gmail.com")
-			.username("frod")
-			.password("frodPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member roy = Member.builder()
-			.email("roy@gmail.com")
-			.username("roy")
-			.password("royPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member hana = Member.builder()
-			.email("hana@gmail.com")
-			.username("hana")
-			.password("hanaPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.isDeleted(true)
-			.build();
+		Member frod = createMember("frod", false);
+		Member roy = createMember("roy", false);
+		Member hana = createMember("hana", true);
 		memberRepository.saveAll(asList(frod, roy, hana));
 
-		Subscription royFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription hanaFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(hana)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription royHanasubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(hana)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		subscriptionRepository.saveAll(asList(royFrodsubscription, hanaFrodsubscription, royHanasubscription));
+		Subscription royFrodSubscription = createSubscription(roy, frod);
+		Subscription hanaFrodSubscription = createSubscription(hana, frod);
+		Subscription royHanaSubscription = createSubscription(roy, hana);
+		subscriptionRepository.saveAll(asList(royFrodSubscription, hanaFrodSubscription, royHanaSubscription));
 
 		PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("createdAt").descending());
 
@@ -344,10 +173,10 @@ class SubscriptionRepositoryTest {
 			.extracting("id", "author", "subscriber", "notificationEnabled")
 			.contains(
 				tuple(
-					royFrodsubscription.getId(),
-					royFrodsubscription.getAuthor(),
-					royFrodsubscription.getSubscriber(),
-					royFrodsubscription.isNotificationEnabled()
+					royFrodSubscription.getId(),
+					royFrodSubscription.getAuthor(),
+					royFrodSubscription.getSubscriber(),
+					royFrodSubscription.isNotificationEnabled()
 				)
 			);
 	}
@@ -356,57 +185,15 @@ class SubscriptionRepositoryTest {
 	@Test
 	void findAllByAuthorAndSubscriberIsDeletedFalse() {
 		// given
-		Member frod = Member.builder()
-			.email("frod@gmail.com")
-			.username("frod")
-			.password("frodPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member roy = Member.builder()
-			.email("roy@gmail.com")
-			.username("roy")
-			.password("royPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member hana = Member.builder()
-			.email("hana@gmail.com")
-			.username("hana")
-			.password("hanaPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
+		Member frod = createMember("frod", false);
+		Member roy = createMember("roy", false);
+		Member hana = createMember("hana", false);
 		memberRepository.saveAll(asList(frod, roy, hana));
 
-		Subscription royFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription hanaFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(hana)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription royHanasubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(hana)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		subscriptionRepository.saveAll(asList(royFrodsubscription, hanaFrodsubscription, royHanasubscription));
+		Subscription royFrodSubscription = createSubscription(roy, frod);
+		Subscription hanaFrodSubscription = createSubscription(hana, frod);
+		Subscription royHanaSubscription = createSubscription(roy, hana);
+		subscriptionRepository.saveAll(asList(royFrodSubscription, hanaFrodSubscription, royHanaSubscription));
 
 		PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("createdAt").descending());
 
@@ -420,16 +207,16 @@ class SubscriptionRepositoryTest {
 			.extracting("id", "author", "subscriber", "notificationEnabled")
 			.contains(
 				tuple(
-					royFrodsubscription.getId(),
-					royFrodsubscription.getAuthor(),
-					royFrodsubscription.getSubscriber(),
-					royFrodsubscription.isNotificationEnabled()
+					royFrodSubscription.getId(),
+					royFrodSubscription.getAuthor(),
+					royFrodSubscription.getSubscriber(),
+					royFrodSubscription.isNotificationEnabled()
 				),
 				tuple(
-					royHanasubscription.getId(),
-					royHanasubscription.getAuthor(),
-					royHanasubscription.getSubscriber(),
-					royHanasubscription.isNotificationEnabled()
+					royHanaSubscription.getId(),
+					royHanaSubscription.getAuthor(),
+					royHanaSubscription.getSubscriber(),
+					royHanaSubscription.isNotificationEnabled()
 				)
 			);
 	}
@@ -438,58 +225,15 @@ class SubscriptionRepositoryTest {
 	@Test
 	void findAllByAuthorAndSubscriberIsDeletedFalse_WithDeletedMember() {
 		// given
-		Member frod = Member.builder()
-			.email("frod@gmail.com")
-			.username("frod")
-			.password("frodPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member roy = Member.builder()
-			.email("roy@gmail.com")
-			.username("roy")
-			.password("royPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member hana = Member.builder()
-			.email("hana@gmail.com")
-			.username("hana")
-			.password("hanaPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.isDeleted(true)
-			.build();
+		Member frod = createMember("frod", false);
+		Member roy = createMember("roy", false);
+		Member hana = createMember("hana", true);
 		memberRepository.saveAll(asList(frod, roy, hana));
 
-		Subscription royFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription hanaFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(hana)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription royHanasubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(hana)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		subscriptionRepository.saveAll(asList(royFrodsubscription, hanaFrodsubscription, royHanasubscription));
+		Subscription royFrodSubscription = createSubscription(roy, frod);
+		Subscription hanaFrodSubscription = createSubscription(hana, frod);
+		Subscription royHanaSubscription = createSubscription(roy, hana);
+		subscriptionRepository.saveAll(asList(royFrodSubscription, hanaFrodSubscription, royHanaSubscription));
 
 		PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("createdAt").descending());
 
@@ -503,10 +247,10 @@ class SubscriptionRepositoryTest {
 			.extracting("id", "author", "subscriber", "notificationEnabled")
 			.contains(
 				tuple(
-					royFrodsubscription.getId(),
-					royFrodsubscription.getAuthor(),
-					royFrodsubscription.getSubscriber(),
-					royFrodsubscription.isNotificationEnabled()
+					royFrodSubscription.getId(),
+					royFrodSubscription.getAuthor(),
+					royFrodSubscription.getSubscriber(),
+					royFrodSubscription.isNotificationEnabled()
 				)
 			);
 	}
@@ -515,57 +259,15 @@ class SubscriptionRepositoryTest {
 	@Test
 	void testFindAllByAuthorAndSubscriberIsDeletedFalse() {
 		// given
-		Member frod = Member.builder()
-			.email("frod@gmail.com")
-			.username("frod")
-			.password("frodPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member roy = Member.builder()
-			.email("roy@gmail.com")
-			.username("roy")
-			.password("royPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member hana = Member.builder()
-			.email("hana@gmail.com")
-			.username("hana")
-			.password("hanaPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
+		Member frod = createMember("frod", false);
+		Member roy = createMember("roy", false);
+		Member hana = createMember("hana", false);
 		memberRepository.saveAll(asList(frod, roy, hana));
 
-		Subscription royFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription hanaFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(hana)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription royHanasubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(hana)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		subscriptionRepository.saveAll(asList(royFrodsubscription, hanaFrodsubscription, royHanasubscription));
+		Subscription royFrodSubscription = createSubscription(roy, frod);
+		Subscription hanaFrodSubscription = createSubscription(hana, frod);
+		Subscription royHanaSubscription = createSubscription(roy, hana);
+		subscriptionRepository.saveAll(asList(royFrodSubscription, hanaFrodSubscription, royHanaSubscription));
 
 		// when
 		List<Subscription> subscriptions = subscriptionRepository
@@ -577,16 +279,16 @@ class SubscriptionRepositoryTest {
 			.extracting("id", "author", "subscriber", "notificationEnabled")
 			.contains(
 				tuple(
-					royFrodsubscription.getId(),
-					royFrodsubscription.getAuthor(),
-					royFrodsubscription.getSubscriber(),
-					royFrodsubscription.isNotificationEnabled()
+					royFrodSubscription.getId(),
+					royFrodSubscription.getAuthor(),
+					royFrodSubscription.getSubscriber(),
+					royFrodSubscription.isNotificationEnabled()
 				),
 				tuple(
-					royHanasubscription.getId(),
-					royHanasubscription.getAuthor(),
-					royHanasubscription.getSubscriber(),
-					royHanasubscription.isNotificationEnabled()
+					royHanaSubscription.getId(),
+					royHanaSubscription.getAuthor(),
+					royHanaSubscription.getSubscriber(),
+					royHanaSubscription.isNotificationEnabled()
 				)
 			);
 	}
@@ -595,58 +297,15 @@ class SubscriptionRepositoryTest {
 	@Test
 	void testFindAllByAuthorAndSubscriberIsDeletedFalse_WithDeletedMember() {
 		// given
-		Member frod = Member.builder()
-			.email("frod@gmail.com")
-			.username("frod")
-			.password("frodPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member roy = Member.builder()
-			.email("roy@gmail.com")
-			.username("roy")
-			.password("royPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-		Member hana = Member.builder()
-			.email("hana@gmail.com")
-			.username("hana")
-			.password("hanaPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.isDeleted(true)
-			.build();
+		Member frod = createMember("frod", false);
+		Member roy = createMember("roy", false);
+		Member hana = createMember("hana", true);
 		memberRepository.saveAll(asList(frod, roy, hana));
 
-		Subscription royFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription hanaFrodsubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(hana)
-			.subscriber(frod)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		Subscription royHanasubscription = Subscription.builder()
-			.id(UUID.randomUUID())
-			.author(roy)
-			.subscriber(hana)
-			.notificationEnabled(true)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.build();
-		subscriptionRepository.saveAll(asList(royFrodsubscription, hanaFrodsubscription, royHanasubscription));
+		Subscription royFrodSubscription = createSubscription(roy, frod);
+		Subscription hanaFrodSubscription = createSubscription(hana, frod);
+		Subscription royHanaSubscription = createSubscription(roy, hana);
+		subscriptionRepository.saveAll(asList(royFrodSubscription, hanaFrodSubscription, royHanaSubscription));
 
 		// when
 		List<Subscription> subscriptions = subscriptionRepository
@@ -658,11 +317,34 @@ class SubscriptionRepositoryTest {
 			.extracting("id", "author", "subscriber", "notificationEnabled")
 			.contains(
 				tuple(
-					royFrodsubscription.getId(),
-					royFrodsubscription.getAuthor(),
-					royFrodsubscription.getSubscriber(),
-					royFrodsubscription.isNotificationEnabled()
+					royFrodSubscription.getId(),
+					royFrodSubscription.getAuthor(),
+					royFrodSubscription.getSubscriber(),
+					royFrodSubscription.isNotificationEnabled()
 				)
 			);
+	}
+
+	private Member createMember(String userName, boolean isDeleted) {
+		return Member.builder()
+			.email(userName + "@example.com")
+			.username(userName)
+			.password(userName + "Password")
+			.roles(Set.of(Role.ROLE_USER))
+			.platform(Platform.SERVER)
+			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
+			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
+			.isDeleted(isDeleted)
+			.build();
+	}
+
+	private Subscription createSubscription(Member author, Member subscriber) {
+		return Subscription.builder()
+			.id(UUID.randomUUID())
+			.author(author)
+			.subscriber(subscriber)
+			.notificationEnabled(true)
+			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
+			.build();
 	}
 }
