@@ -20,6 +20,10 @@ import api.store.diglog.service.notification.NotificationSubscriber;
 @Configuration
 public class RedisConfig {
 
+	private static final String NOTIFICATION_CHANNEL = "notification-channel";
+	private static final String ADDRESS_PREFIX = "redis://";
+	private static final String ADDRESS_DELIMITER = ":";
+
 	@Value("${spring.redis.host}")
 	private String host;
 
@@ -35,8 +39,8 @@ public class RedisConfig {
 
 	@Bean
 	@Primary
-	public RedisTemplate<?, ?> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-		RedisTemplate<?, ?> template = new RedisTemplate<>();
+	public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+		RedisTemplate<String, String> template = new RedisTemplate<>();
 		template.setConnectionFactory(redisConnectionFactory);
 
 		template.setKeySerializer(new StringRedisSerializer());
@@ -53,11 +57,12 @@ public class RedisConfig {
 	@Bean
 	public RedisMessageListenerContainer container(
 		RedisConnectionFactory connectionFactory,
-		NotificationSubscriber notificationSubscriber
+		NotificationSubscriber notificationSubscriber,
+		ChannelTopic notificationTopic
 	) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory);
-		container.addMessageListener(notificationSubscriber, new ChannelTopic("notification-channel"));
+		container.addMessageListener(notificationSubscriber, notificationTopic);
 		return container;
 	}
 
@@ -65,8 +70,13 @@ public class RedisConfig {
 	public RedissonClient redissonClient() {
 		Config config = new Config();
 		config.useSingleServer()
-			.setAddress("redis://" + host + ":" + port);
+			.setAddress(ADDRESS_PREFIX + host + ADDRESS_DELIMITER + port);
 		return Redisson.create(config);
+	}
+
+	@Bean
+	public ChannelTopic notificationTopic() {
+		return new ChannelTopic(NOTIFICATION_CHANNEL);
 	}
 
 }
