@@ -1,11 +1,15 @@
 package api.store.diglog.model.entity.notification;
 
+import static api.store.diglog.model.entity.notification.NotificationType.*;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import api.store.diglog.common.exception.CustomException;
+import api.store.diglog.common.exception.ErrorCode;
 import api.store.diglog.model.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,9 +21,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,10 +36,20 @@ import lombok.NoArgsConstructor;
 )
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 @Getter
 public class Notification {
+
+	@Builder
+	public Notification(UUID id, Member receiver, NotificationType notificationType, String message, boolean isRead) {
+
+		validateNotificationType(notificationType);
+
+		this.id = id;
+		this.receiver = receiver;
+		this.notificationType = notificationType;
+		this.message = message;
+		this.isRead = isRead;
+	}
 
 	@Id
 	private UUID id;
@@ -59,5 +73,16 @@ public class Notification {
 
 	public void markAsRead() {
 		this.isRead = true;
+	}
+
+	@PostLoad
+	private void validateAfterLoad() {
+		validateNotificationType(this.notificationType);
+	}
+
+	private void validateNotificationType(NotificationType notificationType) {
+		if (notificationType == INVALID) {
+			throw new CustomException(ErrorCode.NOTIFICATION_INVALID_NOTIFICATION_TYPE);
+		}
 	}
 }
