@@ -1,5 +1,7 @@
 package api.store.diglog.repository;
 
+import static java.util.Collections.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -11,29 +13,28 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Repository
 public class SseEmitterRepository {
+	private static final List<SseEmitter> EMPTY_SSE_EMITTER_LIST = emptyList();
 
 	private final Map<UUID, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
 	public List<SseEmitter> findById(UUID userId) {
-		return emitters.getOrDefault(userId, new CopyOnWriteArrayList<>());
+		return emitters.getOrDefault(userId, EMPTY_SSE_EMITTER_LIST);
 	}
 
 	public SseEmitter save(UUID userId, SseEmitter sseEmitter) {
-		emitters.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>()).add(sseEmitter);
+		emitters.computeIfAbsent(userId, userKey -> new CopyOnWriteArrayList<>()).add(sseEmitter);
 		return sseEmitter;
 	}
 
 	public void deleteBy(UUID userId, SseEmitter sseEmitter) {
-		List<SseEmitter> list = emitters.get(userId);
-		if (list == null) {
-			return;
-		}
+		emitters.computeIfPresent(userId, (userKey, emitterList) -> {
+			emitterList.remove(sseEmitter);
 
-		list.remove(sseEmitter);
-
-		if (list.isEmpty()) {
-			emitters.remove(userId);
-		}
+			if (emitterList.isEmpty()) {
+				return null;
+			}
+			return emitterList;
+		});
 	}
 
 }
