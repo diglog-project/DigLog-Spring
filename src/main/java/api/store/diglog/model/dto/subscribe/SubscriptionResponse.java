@@ -17,14 +17,14 @@ import lombok.NoArgsConstructor;
 public class SubscriptionResponse {
 
 	private UUID subscriptionId;
-	private String authorUsername;
+	private String authorName;
 	private boolean notificationEnabled;
 	private LocalDateTime createdAt;
 
 	public static SubscriptionResponse from(Subscription subscription) {
 		return SubscriptionResponse.builder()
 			.subscriptionId(subscription.getId())
-			.authorUsername(subscription.getAuthor().getUsername())
+			.authorName(subscription.getAuthor().getUsername())
 			.notificationEnabled(subscription.isNotificationEnabled())
 			.createdAt(subscription.getCreatedAt())
 			.build();

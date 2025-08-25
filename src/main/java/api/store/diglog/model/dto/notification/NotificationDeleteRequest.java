@@ -1,6 +1,6 @@
 package api.store.diglog.model.dto.notification;
 
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -18,6 +18,6 @@ import lombok.NoArgsConstructor;
 public class NotificationDeleteRequest {
 
 	@NotEmpty(message = "삭제할 알림을 선택해주세요.")
-	private List<@NotNull UUID> notificationIds;
+	private Set<@NotNull UUID> notificationIds;
 
 }

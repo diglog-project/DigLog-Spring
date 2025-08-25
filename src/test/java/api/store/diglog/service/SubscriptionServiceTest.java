@@ -80,7 +80,7 @@ class SubscriptionServiceTest {
 		// then
 		assertThat(subscriptionResponse.getContent())
 			.hasSize(1)
-			.extracting("subscriptionId", "authorUsername", "notificationEnabled")
+			.extracting("subscriptionId", "authorName", "notificationEnabled")
 			.containsExactly(tuple(subscription.getId(), author.getUsername(), true));
 	}
 
@@ -105,7 +105,7 @@ class SubscriptionServiceTest {
 		// then
 		assertThat(subscriptionResponse.getContent())
 			.hasSize(2)
-			.extracting("subscriptionId", "subscriberUsername", "notificationEnabled")
+			.extracting("subscriptionId", "subscriberName", "notificationEnabled")
 			.containsExactlyInAnyOrderElementsOf(
 				asList(
 					tuple(royFrodSubscription.getId(), frod.getUsername(), true),

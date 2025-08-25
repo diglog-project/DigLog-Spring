@@ -73,12 +73,7 @@ public class SubscriptionService {
 			.build();
 		Subscription savedSubscription = subscriptionRepository.save(subscription);
 
-		return SubscriptionCreateResponse.builder()
-			.authorName(author.getUsername())
-			.subscriberName(subscriber.getUsername())
-			.notificationEnabled(savedSubscription.isNotificationEnabled())
-			.createdAt(savedSubscription.getCreatedAt())
-			.build();
+		return SubscriptionCreateResponse.from(savedSubscription);
 	}
 
 	@Transactional

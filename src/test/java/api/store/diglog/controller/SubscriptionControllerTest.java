@@ -79,7 +79,7 @@ class SubscriptionControllerTest {
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.content[0].subscriptionId").value(subscription.getId().toString()))
-			.andExpect(jsonPath("$.content[0].authorUsername").value("author"))
+			.andExpect(jsonPath("$.content[0].authorName").value("author"))
 			.andExpect(jsonPath("$.content[0].notificationEnabled").value(true));
 	}
 
@@ -113,10 +113,10 @@ class SubscriptionControllerTest {
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.content[0].subscriptionId").value(subscription01.getId().toString()))
-			.andExpect(jsonPath("$.content[0].subscriberUsername").value(subscription01.getSubscriber().getUsername()))
+			.andExpect(jsonPath("$.content[0].subscriberName").value(subscription01.getSubscriber().getUsername()))
 			.andExpect(jsonPath("$.content[0].notificationEnabled").value(true))
 			.andExpect(jsonPath("$.content[1].subscriptionId").value(subscription02.getId().toString()))
-			.andExpect(jsonPath("$.content[1].subscriberUsername").value(subscription02.getSubscriber().getUsername()))
+			.andExpect(jsonPath("$.content[1].subscriberName").value(subscription02.getSubscriber().getUsername()))
 			.andExpect(jsonPath("$.content[1].notificationEnabled").value(true));
 	}
 
@@ -160,12 +160,7 @@ class SubscriptionControllerTest {
 		Member loginMember = createMember("loginMember");
 		Subscription subscription = createSubscription(author, loginMember, true);
 
-		SubscriptionCreateResponse response = SubscriptionCreateResponse.builder()
-			.authorName("author")
-			.subscriberName("loginMember")
-			.notificationEnabled(true)
-			.createdAt(subscription.getCreatedAt())
-			.build();
+		SubscriptionCreateResponse response = SubscriptionCreateResponse.from(subscription);
 
 		BDDMockito.doReturn(response)
 			.when(subscriptionService)
