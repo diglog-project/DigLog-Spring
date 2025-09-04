@@ -32,16 +32,20 @@ public class SubscriptionService {
 	private final SubscriptionRepository subscriptionRepository;
 	private final MemberService memberService;
 
-	public Page<SubscriptionResponse> getUserSubscriptions(String userName, int page, int size) {
-		Member user = memberService.findActiveMemberByUsername(userName);
-		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+	public Page<SubscriptionResponse> getUserSubscriptions(String username, int page, int size) {
+		Member user = memberService.findActiveMemberByUsername(username);
+		PageRequest pageRequest = PageRequest.of(page, size,
+			Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"))
+		);
 		return subscriptionRepository.findAllBySubscriberAndAuthorIsDeletedFalse(user, pageRequest)
 			.map(SubscriptionResponse::from);
 	}
 
 	public Page<SubscriberResponse> getAuthorSubscribers(String authorName, int page, int size) {
 		Member author = memberService.findActiveMemberByUsername(authorName);
-		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+		PageRequest pageRequest = PageRequest.of(page, size,
+			Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"))
+		);
 		return subscriptionRepository.findAllByAuthorAndSubscriberIsDeletedFalse(author, pageRequest)
 			.map(SubscriberResponse::from);
 	}
@@ -60,7 +64,6 @@ public class SubscriptionService {
 		Member author = memberService.findActiveMemberByUsername(subscriptionCreateRequest.getAuthorName());
 		Member subscriber = memberService.getCurrentMember();
 
-		validateActiveAuthor(author);
 		validateSelfSubscription(author, subscriber);
 		validateAlreadySubscribed(author, subscriber);
 		validateSubscriptionLimits(subscriber);
@@ -103,12 +106,6 @@ public class SubscriptionService {
 		validateCurrentMemberIsSubscriber(currentMember, subscription.getSubscriber());
 
 		subscriptionRepository.delete(subscription);
-	}
-
-	private void validateActiveAuthor(Member author) {
-		if (author.isDeleted()) {
-			throw new CustomException(SUBSCRIPTION_INACTIVE_AUTHOR);
-		}
 	}
 
 	private void validateSelfSubscription(Member author, Member subscriber) {
