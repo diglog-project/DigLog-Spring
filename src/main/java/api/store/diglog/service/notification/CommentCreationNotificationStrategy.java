@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CommentCreationNotificationStrategy implements NotificationStrategy {
 
-	private static final String NOTIFICATION_MESSAGE_FORMAT = "%s님이 %s 게시글에 댓글을 작성했습니다.";
+	private static final String NOTIFICATION_MESSAGE_FORMAT = "%s님이 \"%s\" 게시글에 댓글을 작성했습니다.";
 
 	private final CommentRepository commentRepository;
 
@@ -56,7 +56,7 @@ public class CommentCreationNotificationStrategy implements NotificationStrategy
 	}
 
 	private void validateSelfCommentNotification(Member author, Member commenter) {
-		if (commenter.isSame(author)) {
+		if (commenter.equals(author)) {
 			throw new CustomException(NOTIFICATION_SELF_COMMENT);
 		}
 	}
