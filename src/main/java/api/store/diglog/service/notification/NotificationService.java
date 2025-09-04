@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.model.dto.notification.NotificationCreateRequest;
 import api.store.diglog.model.dto.notification.NotificationDeleteRequest;
@@ -33,9 +34,12 @@ public class NotificationService {
 		notificationPublisher.publish(notifications);
 	}
 
+	@Transactional(readOnly = true)
 	public Page<NotificationResponse> searchBy(int page, int size) {
 		Member receiver = memberService.getCurrentMember();
-		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+		PageRequest pageRequest = PageRequest.of(page, size,
+			Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"))
+		);
 		return notificationRepository.findAllByReceiver(receiver, pageRequest)
 			.map(NotificationResponse::from);
 	}
