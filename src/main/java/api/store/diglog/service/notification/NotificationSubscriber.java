@@ -1,6 +1,5 @@
 package api.store.diglog.service.notification;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.data.redis.connection.Message;
@@ -8,6 +7,7 @@ import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -27,14 +27,15 @@ public class NotificationSubscriber implements MessageListener {
 	@Override
 	public void onMessage(Message message, @Nullable byte[] pattern) {
 		try {
-			String json = new String(message.getBody(), StandardCharsets.UTF_8);
 			List<NotificationPayload> payloads = objectMapper.readValue(
-				json, new TypeReference<>() {
+				message.getBody(), new TypeReference<>() {
 				}
 			);
 
 			payloads.forEach(this::sendMessage);
 
+		} catch (JsonProcessingException e) {
+			log.error("Failed to deserialize notification payload", e);
 		} catch (Exception e) {
 			log.error("Failed to process notification payload", e);
 		}
