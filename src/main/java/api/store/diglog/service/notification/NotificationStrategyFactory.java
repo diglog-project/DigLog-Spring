@@ -1,8 +1,9 @@
 package api.store.diglog.service.notification;
 
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,11 +17,9 @@ public class NotificationStrategyFactory {
 
 	@Autowired
 	public NotificationStrategyFactory(List<NotificationStrategy> notificationStrategies) {
-		this.notificationStrategies = notificationStrategies.stream()
-			.collect(Collectors.toMap(
-				NotificationStrategy::getType,
-				notificationStrategy -> notificationStrategy
-			));
+		Map<NotificationType, NotificationStrategy> map = new EnumMap<>(NotificationType.class);
+		notificationStrategies.forEach(strategy -> map.put(strategy.getType(), strategy));
+		this.notificationStrategies = Collections.unmodifiableMap(map);
 	}
 
 	public NotificationStrategy getStrategy(NotificationType notificationType) {
