@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,25 +26,27 @@ import api.store.diglog.model.dto.notification.NotificationResponse;
 import api.store.diglog.service.SseEmitterService;
 import api.store.diglog.service.notification.NotificationService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
+@Validated
 public class NotificationController {
 
 	private final SseEmitterService sseEmitterService;
 	private final NotificationService notificationService;
 
-	@GetMapping(value = "/sse/subscribe", produces = "text/event-stream")
+	@GetMapping(value = "/sse/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public SseEmitter subscribe() {
 		return sseEmitterService.subscribe();
 	}
 
 	@GetMapping
 	public ResponseEntity<Page<NotificationResponse>> search(
-		@RequestParam(name = "page", defaultValue = "0") int page,
-		@RequestParam(name = "size", defaultValue = "20") int size
+		@RequestParam(name = "page", defaultValue = "0") @Min(0) int page,
+		@RequestParam(name = "size", defaultValue = "20") @Min(1) int size
 	) {
 		Page<NotificationResponse> responses = notificationService.searchBy(page, size);
 		return ResponseEntity.ok().body(responses);
