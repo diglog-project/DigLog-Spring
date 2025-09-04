@@ -2,7 +2,8 @@ package api.store.diglog.service.notification;
 
 import java.util.List;
 
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -19,10 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NotificationPublisher {
 
-	private static final String REDIS_NOTIFICATION_CHANNEL = "notification-channel";
 	private static final int BATCH_SIZE = 20;
 
-	private final RedisTemplate<String, String> redisTemplate;
+	private final StringRedisTemplate redisTemplate;
+	private final ChannelTopic notificationChannel;
 	private final ObjectMapper objectMapper;
 
 	public void publish(List<Notification> notifications) {
@@ -39,7 +40,7 @@ public class NotificationPublisher {
 
 				try {
 					String jsonPayload = objectMapper.writeValueAsString(payloads);
-					redisTemplate.convertAndSend(REDIS_NOTIFICATION_CHANNEL, jsonPayload);
+					redisTemplate.convertAndSend(notificationChannel.getTopic(), jsonPayload);
 				} catch (JsonProcessingException e) {
 					log.error("Failed to serialize payloads", e);
 				}
