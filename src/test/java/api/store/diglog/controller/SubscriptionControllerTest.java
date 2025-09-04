@@ -173,7 +173,7 @@ class SubscriptionControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 			.andDo(print())
-			.andExpect(status().isOk())
+			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.authorName").value("author"))
 			.andExpect(jsonPath("$.subscriberName").value("loginMember"))
 			.andExpect(jsonPath("$.notificationEnabled").value(true))

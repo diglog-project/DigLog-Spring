@@ -3,7 +3,9 @@ package api.store.diglog.controller;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,11 +24,13 @@ import api.store.diglog.model.dto.subscribe.SubscriptionNotificationActivationRe
 import api.store.diglog.model.dto.subscribe.SubscriptionResponse;
 import api.store.diglog.service.SubscriptionService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/subscriptions")
 @RequiredArgsConstructor
+@Validated
 public class SubscriptionController {
 
 	private final SubscriptionService subscriptionService;
@@ -34,8 +38,8 @@ public class SubscriptionController {
 	@GetMapping("/users/{username}")
 	public ResponseEntity<Page<SubscriptionResponse>> getUserSubscriptions(
 		@PathVariable("username") String username,
-		@RequestParam(name = "page", defaultValue = "0") int page,
-		@RequestParam(name = "size", defaultValue = "20") int size
+		@RequestParam(name = "page", defaultValue = "0") @Min(0) int page,
+		@RequestParam(name = "size", defaultValue = "20") @Min(1) int size
 	) {
 		Page<SubscriptionResponse> response = subscriptionService.getUserSubscriptions(username, page, size);
 		return ResponseEntity.ok().body(response);
@@ -44,8 +48,8 @@ public class SubscriptionController {
 	@GetMapping("/authors/{authorName}")
 	public ResponseEntity<Page<SubscriberResponse>> getAuthorSubscribers(
 		@PathVariable("authorName") String authorName,
-		@RequestParam(name = "page", defaultValue = "0") int page,
-		@RequestParam(name = "size", defaultValue = "20") int size
+		@RequestParam(name = "page", defaultValue = "0") @Min(0) int page,
+		@RequestParam(name = "size", defaultValue = "20") @Min(1) int size
 	) {
 		Page<SubscriberResponse> response = subscriptionService.getAuthorSubscribers(authorName, page, size);
 		return ResponseEntity.ok().body(response);
@@ -64,7 +68,7 @@ public class SubscriptionController {
 		@RequestBody @Valid SubscriptionCreateRequest request
 	) {
 		SubscriptionCreateResponse response = subscriptionService.create(request);
-		return ResponseEntity.ok().body(response);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	@PatchMapping("/{subscriptionId}/notification-setting")
