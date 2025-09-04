@@ -83,12 +83,8 @@ public class Member {
 		this.username = username;
 	}
 
-	public boolean isSame(Member other) {
-		return this.equals(other);
-	}
-
 	public boolean isDifferent(Member other) {
-		return !isSame(other);
+		return !this.equals(other);
 	}
 
 	@Override
@@ -97,11 +93,11 @@ public class Member {
 			return true;
 		if (!(o instanceof Member other))
 			return false;
-		return this.id != null && this.id.equals(other.id);
+		return this.getId() != null && this.getId().equals(other.getId());
 	}
 
 	@Override
 	public int hashCode() {
-		return (id != null) ? id.hashCode() : System.identityHashCode(this);
+		return (getId() != null) ? getId().hashCode() : getClass().hashCode();
 	}
 }
