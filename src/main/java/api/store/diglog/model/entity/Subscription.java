@@ -47,17 +47,19 @@ public class Subscription {
 	private UUID id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "author_id")
+	@JoinColumn(name = "author_id", nullable = false)
 	private Member author;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "subscriber_id")
+	@JoinColumn(name = "subscriber_id", nullable = false)
 	private Member subscriber;
 
 	@Column(nullable = false)
-	private boolean notificationEnabled;
+	@Builder.Default
+	private boolean notificationEnabled = true;
 
 	@CreatedDate
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
 	public void enableNotification() {
