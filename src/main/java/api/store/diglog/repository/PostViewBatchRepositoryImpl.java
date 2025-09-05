@@ -14,7 +14,7 @@ import jakarta.persistence.PersistenceContext;
 public class PostViewBatchRepositoryImpl implements PostViewBatchRepository {
 
 	private static final String SQL_UPDATE_VIEW_COUNT_PREFIX = "UPDATE post SET view_count = CASE id ";
-	private static final String SQL_WHEN_CLAUSE_FORMAT = "WHEN UUID_TO_BIN('%s') THEN %d ";
+	private static final String SQL_WHEN_CLAUSE_FORMAT = "WHEN '%s' THEN '%d' ";
 	private static final String SQL_UPDATE_VIEW_COUNT_SUFFIX = "END WHERE id IN (%s);";
 	private static final String SQL_STRING_WRAPPER = "'";
 	private static final String SQL_IN_CLAUSE_DELIMITER = ",";
@@ -39,9 +39,8 @@ public class PostViewBatchRepositoryImpl implements PostViewBatchRepository {
 			sql.append(String.format(SQL_WHEN_CLAUSE_FORMAT, entry.getKey(), entry.getValue()));
 		}
 		String idList = viewCounts.keySet().stream()
-			.map(uuid -> "UUID_TO_BIN(" + SQL_STRING_WRAPPER + uuid + SQL_STRING_WRAPPER + ")")
+			.map(uuid -> SQL_STRING_WRAPPER + uuid + SQL_STRING_WRAPPER)
 			.collect(Collectors.joining(SQL_IN_CLAUSE_DELIMITER));
-
 		sql.append(String.format(SQL_UPDATE_VIEW_COUNT_SUFFIX, idList));
 		return sql.toString();
 	}
