@@ -35,13 +35,13 @@ public class SubscriptionController {
 
 	private final SubscriptionService subscriptionService;
 
-	@GetMapping("/users/{username}")
+	@GetMapping("/subscribers/{subscriberName}")
 	public ResponseEntity<Page<SubscriptionResponse>> getUserSubscriptions(
-		@PathVariable("username") String username,
+		@PathVariable("subscriberName") String subscriberName,
 		@RequestParam(name = "page", defaultValue = "0") @Min(0) int page,
 		@RequestParam(name = "size", defaultValue = "20") @Min(1) int size
 	) {
-		Page<SubscriptionResponse> response = subscriptionService.getUserSubscriptions(username, page, size);
+		Page<SubscriptionResponse> response = subscriptionService.getUserSubscriptions(subscriberName, page, size);
 		return ResponseEntity.ok().body(response);
 	}
 

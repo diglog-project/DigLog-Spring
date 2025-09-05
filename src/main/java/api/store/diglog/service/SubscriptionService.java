@@ -32,12 +32,12 @@ public class SubscriptionService {
 	private final SubscriptionRepository subscriptionRepository;
 	private final MemberService memberService;
 
-	public Page<SubscriptionResponse> getUserSubscriptions(String username, int page, int size) {
-		Member user = memberService.findActiveMemberByUsername(username);
+	public Page<SubscriptionResponse> getUserSubscriptions(String subscriberName, int page, int size) {
+		Member subscriber = memberService.findActiveMemberByUsername(subscriberName);
 		PageRequest pageRequest = PageRequest.of(page, size,
 			Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"))
 		);
-		return subscriptionRepository.findAllBySubscriberAndAuthorIsDeletedFalse(user, pageRequest)
+		return subscriptionRepository.findAllBySubscriberAndAuthorIsDeletedFalse(subscriber, pageRequest)
 			.map(SubscriptionResponse::from);
 	}
 

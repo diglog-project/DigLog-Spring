@@ -71,7 +71,7 @@ class SubscriptionControllerTest {
 			.getUserSubscriptions(anyString(), anyInt(), anyInt());
 
 		// when, then
-		mockMvc.perform(get("/api/subscriptions/users/{username}", "subscriber")
+		mockMvc.perform(get("/api/subscriptions/subscribers/{subscriberName}", "subscriber")
 				.param("page", "0")
 				.param("size", "20")
 				.contentType(MediaType.APPLICATION_JSON)
