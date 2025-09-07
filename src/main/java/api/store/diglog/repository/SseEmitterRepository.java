@@ -18,7 +18,7 @@ public class SseEmitterRepository {
 	private final Map<UUID, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
 	public List<SseEmitter> findById(UUID userId) {
-		return emitters.getOrDefault(userId, EMPTY_SSE_EMITTER_LIST);
+		return unmodifiableList(emitters.getOrDefault(userId, EMPTY_SSE_EMITTER_LIST));
 	}
 
 	public SseEmitter save(UUID userId, SseEmitter sseEmitter) {
