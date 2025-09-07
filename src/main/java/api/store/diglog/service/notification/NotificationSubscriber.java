@@ -42,11 +42,31 @@ public class NotificationSubscriber implements MessageListener {
 	}
 
 	private void sendMessage(NotificationPayload payload) {
+		if (isInvalidPayload(payload)) {
+			return;
+		}
+
 		try {
 			sseEmitterService.send(payload.getReceiverId(), payload.getMessage());
 		} catch (Exception ex) {
 			log.warn("Failed to deliver notification to receiverId={}", payload.getReceiverId(), ex);
 		}
+	}
+
+	private boolean isInvalidPayload(NotificationPayload payload) {
+		if (payload == null) {
+			log.warn("Skip delivering notification: payload is null");
+			return true;
+		}
+		if (payload.getReceiverId() == null) {
+			log.warn("Skip delivering notification: receiverId is null. payload={}", payload);
+			return true;
+		}
+		if (payload.getMessage() == null || payload.getMessage().isBlank()) {
+			log.warn("Skip delivering notification: message is blank. receiverId={}", payload.getReceiverId());
+			return true;
+		}
+		return false;
 	}
 
 }
