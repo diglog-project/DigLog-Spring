@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(
 	indexes = {
-		@Index(name = "idx_notification_created_at", columnList = "created_at")
+		@Index(name = "idx_notification_receiver_created_at_id", columnList = "receiver_id, created_at, id")
 	}
 )
 @EntityListeners(AuditingEntityListener.class)
