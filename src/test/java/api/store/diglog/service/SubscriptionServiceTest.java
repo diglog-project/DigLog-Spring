@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -60,6 +61,11 @@ class SubscriptionServiceTest {
 			List.of(new SimpleGrantedAuthority("ROLE_USER"))
 		);
 		SecurityContextHolder.getContext().setAuthentication(auth);
+	}
+
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
 	}
 
 	@DisplayName("회원의 구독 목록을 조회할 수 있다.")
