@@ -18,4 +18,6 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
 	@EntityGraph(attributePaths = "receiver")
 	List<Notification> findAllByReceiverAndIsReadFalse(Member receiver);
 
+	long countByReceiverAndIsReadFalse(Member receiver);
+
 }

@@ -23,6 +23,7 @@ import api.store.diglog.model.dto.notification.NotificationDeleteRequest;
 import api.store.diglog.model.dto.notification.NotificationDeleteResponse;
 import api.store.diglog.model.dto.notification.NotificationReadResponse;
 import api.store.diglog.model.dto.notification.NotificationResponse;
+import api.store.diglog.model.dto.notification.NotificationUnreadCountResponse;
 import api.store.diglog.service.SseEmitterService;
 import api.store.diglog.service.notification.NotificationService;
 import jakarta.validation.Valid;
@@ -50,6 +51,12 @@ public class NotificationController {
 	) {
 		Page<NotificationResponse> responses = notificationService.searchBy(page, size);
 		return ResponseEntity.ok().body(responses);
+	}
+
+	@GetMapping("/unread-count")
+	public ResponseEntity<NotificationUnreadCountResponse> countUnreadNotification() {
+		NotificationUnreadCountResponse response = notificationService.countUnreadNotification();
+		return ResponseEntity.ok().body(response);
 	}
 
 	@PostMapping

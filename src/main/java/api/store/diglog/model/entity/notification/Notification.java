@@ -31,7 +31,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(
 	indexes = {
-		@Index(name = "idx_notification_receiver_created_at_id", columnList = "receiver_id, created_at, id")
+		@Index(name = "idx_notification_receiver_created_at_id", columnList = "receiver_id, created_at, id"),
+		@Index(name = "idx_notification_receiver_is_read", columnList = "receiver_id, is_read")
 	}
 )
 @EntityListeners(AuditingEntityListener.class)
@@ -41,7 +42,6 @@ public class Notification {
 
 	@Builder
 	public Notification(UUID id, Member receiver, NotificationType notificationType, String message, boolean isRead) {
-
 		validateNotificationType(notificationType);
 
 		this.id = id;

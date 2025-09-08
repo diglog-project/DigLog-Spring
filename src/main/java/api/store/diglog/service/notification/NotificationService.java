@@ -14,6 +14,7 @@ import api.store.diglog.model.dto.notification.NotificationDeleteRequest;
 import api.store.diglog.model.dto.notification.NotificationDeleteResponse;
 import api.store.diglog.model.dto.notification.NotificationReadResponse;
 import api.store.diglog.model.dto.notification.NotificationResponse;
+import api.store.diglog.model.dto.notification.NotificationUnreadCountResponse;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.notification.Notification;
 import api.store.diglog.repository.NotificationRepository;
@@ -42,6 +43,13 @@ public class NotificationService {
 		);
 		return notificationRepository.findAllByReceiver(receiver, pageRequest)
 			.map(NotificationResponse::from);
+	}
+
+	@Transactional(readOnly = true)
+	public NotificationUnreadCountResponse countUnreadNotification() {
+		Member currentMember = memberService.getCurrentMember();
+		long unreadCount = notificationRepository.countByReceiverAndIsReadFalse(currentMember);
+		return NotificationUnreadCountResponse.of(unreadCount);
 	}
 
 	public NotificationReadResponse markAsRead(UUID notificationId) {
