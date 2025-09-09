@@ -22,13 +22,13 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class NotificationTransactionService {
 
 	private final NotificationRepository notificationRepository;
 	private final NotificationStrategyFactory notificationStrategyFactory;
 	private final MemberService memberService;
 
-	@Transactional
 	public List<Notification> create(NotificationCreateRequest request) {
 		NotificationType notificationType = NotificationType.from(request.getNotificationType());
 		NotificationStrategy strategy = notificationStrategyFactory.getStrategy(notificationType);
@@ -50,7 +50,6 @@ public class NotificationTransactionService {
 		return notificationRepository.saveAll(notifications);
 	}
 
-	@Transactional
 	public NotificationReadResponse markAsRead(UUID notificationId) {
 		Member currentMember = memberService.getCurrentMember();
 		Notification notification = notificationRepository.findById(notificationId)
@@ -62,7 +61,6 @@ public class NotificationTransactionService {
 		return NotificationReadResponse.from(notification);
 	}
 
-	@Transactional
 	public List<NotificationReadResponse> markAllAsRead() {
 		Member currentMember = memberService.getCurrentMember();
 		List<Notification> notifications = notificationRepository.findAllByReceiverAndIsReadFalse(currentMember);
@@ -75,7 +73,6 @@ public class NotificationTransactionService {
 			.toList();
 	}
 
-	@Transactional
 	public void delete(UUID notificationId) {
 		Member currentMember = memberService.getCurrentMember();
 		Notification notification = notificationRepository.findById(notificationId)
@@ -86,7 +83,6 @@ public class NotificationTransactionService {
 		notificationRepository.delete(notification);
 	}
 
-	@Transactional
 	public NotificationDeleteResponse deleteAll(NotificationDeleteRequest request) {
 		Member currentMember = memberService.getCurrentMember();
 		List<Notification> notifications = notificationRepository.findAllById(request.getNotificationIds());
