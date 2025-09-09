@@ -1,16 +1,10 @@
 package api.store.diglog.controller;
 
-import api.store.diglog.model.constant.Platform;
-import api.store.diglog.model.constant.Role;
-import api.store.diglog.model.entity.Member;
-import api.store.diglog.model.entity.Post;
-import api.store.diglog.model.entity.Tag;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.repository.PostRepository;
-import api.store.diglog.repository.TagRepository;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,16 +18,23 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import api.store.diglog.model.constant.Platform;
+import api.store.diglog.model.constant.Role;
+import api.store.diglog.model.entity.Member;
+import api.store.diglog.model.entity.Post;
+import api.store.diglog.model.entity.Tag;
+import api.store.diglog.repository.MemberRepository;
+import api.store.diglog.repository.PostRepository;
+import api.store.diglog.repository.TagRepository;
+import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-class TagControllerTest {
+class TagControllerTest extends RedisTestSupporter {
 
 	@Autowired
 	private MockMvc mockMvc;

@@ -38,11 +38,12 @@ import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Subscription;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.SubscriptionRepository;
+import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class SubscriptionServiceTest {
+class SubscriptionServiceTest extends RedisTestSupporter {
 
 	@Autowired
 	MemberRepository memberRepository;

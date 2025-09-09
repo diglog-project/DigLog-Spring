@@ -38,11 +38,12 @@ import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.NotificationRepository;
 import api.store.diglog.repository.PostRepository;
 import api.store.diglog.repository.SubscriptionRepository;
+import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class NotificationTransactionServiceTest {
+class NotificationTransactionServiceTest extends RedisTestSupporter {
 
 	@Autowired
 	private MemberRepository memberRepository;

@@ -22,11 +22,12 @@ import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Subscription;
+import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class SubscriptionRepositoryTest {
+class SubscriptionRepositoryTest extends RedisTestSupporter {
 
 	@Autowired
 	MemberRepository memberRepository;

@@ -14,10 +14,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import api.store.diglog.model.entity.notification.NotificationType;
+import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class NotificationStrategyFactoryTest {
+class NotificationStrategyFactoryTest extends RedisTestSupporter {
 
 	@Autowired
 	private NotificationStrategyFactory notificationStrategyFactory;

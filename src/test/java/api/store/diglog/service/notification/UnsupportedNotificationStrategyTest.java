@@ -14,11 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.entity.notification.NotificationType;
+import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class UnsupportedNotificationStrategyTest {
+class UnsupportedNotificationStrategyTest extends RedisTestSupporter {
 
 	@Autowired
 	private UnsupportedNotificationStrategy unsupportedNotificationStrategy;

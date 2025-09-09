@@ -20,12 +20,13 @@ import api.store.diglog.model.dto.folder.FolderPostCountResponse;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
+import api.store.diglog.supporter.RedisTestSupporter;
 import jakarta.persistence.EntityManager;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class FolderRepositoryTest {
+class FolderRepositoryTest extends RedisTestSupporter {
 
 	@Autowired
 	MemberRepository memberRepository;

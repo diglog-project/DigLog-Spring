@@ -23,11 +23,12 @@ import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.notification.Notification;
+import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class NotificationRepositoryTest {
+class NotificationRepositoryTest extends RedisTestSupporter {
 
 	@Autowired
 	NotificationRepository notificationRepository;

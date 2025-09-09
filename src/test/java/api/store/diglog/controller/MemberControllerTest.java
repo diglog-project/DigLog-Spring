@@ -5,6 +5,7 @@ import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.member.MemberUsernameRequest;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.repository.MemberRepository;
+import api.store.diglog.supporter.RedisTestSupporter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-class MemberControllerTest {
+class MemberControllerTest extends RedisTestSupporter {
 
 	@Autowired
 	private MockMvc mockMvc;

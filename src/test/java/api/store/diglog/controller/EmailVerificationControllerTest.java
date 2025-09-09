@@ -1,12 +1,9 @@
 package api.store.diglog.controller;
 
-import api.store.diglog.model.dto.emailVerification.EmailVerificationRequest;
-import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequest;
-import api.store.diglog.model.entity.EmailVerification;
-import api.store.diglog.repository.EmailVerificationRepository;
-import api.store.diglog.repository.MemberRepository;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,15 +17,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import api.store.diglog.model.dto.emailVerification.EmailVerificationRequest;
+import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequest;
+import api.store.diglog.model.entity.EmailVerification;
+import api.store.diglog.repository.EmailVerificationRepository;
+import api.store.diglog.repository.MemberRepository;
+import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-class EmailVerificationControllerTest {
+class EmailVerificationControllerTest extends RedisTestSupporter {
 
 	@Autowired
 	private MockMvc mockMvc;

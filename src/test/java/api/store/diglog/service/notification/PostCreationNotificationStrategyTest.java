@@ -25,11 +25,12 @@ import api.store.diglog.model.entity.notification.NotificationType;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.PostRepository;
 import api.store.diglog.repository.SubscriptionRepository;
+import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class PostCreationNotificationStrategyTest {
+class PostCreationNotificationStrategyTest extends RedisTestSupporter {
 
 	@Autowired
 	private MemberRepository memberRepository;

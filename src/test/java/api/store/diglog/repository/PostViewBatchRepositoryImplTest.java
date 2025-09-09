@@ -23,10 +23,11 @@ import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
+import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class PostViewBatchRepositoryImplTest {
+class PostViewBatchRepositoryImplTest extends RedisTestSupporter {
 
 	@Autowired
 	private PostViewBatchRepository postViewBatchRepository;

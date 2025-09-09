@@ -1,18 +1,12 @@
 package api.store.diglog.controller;
 
-import api.store.diglog.common.auth.JWTUtil;
-import api.store.diglog.model.constant.Role;
-import api.store.diglog.model.dto.comment.CommentRequest;
-import api.store.diglog.model.dto.comment.CommentUpdateRequest;
-import api.store.diglog.model.entity.Comment;
-import api.store.diglog.model.entity.Member;
-import api.store.diglog.model.entity.Post;
-import api.store.diglog.repository.CommentRepository;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.repository.PostRepository;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,18 +22,25 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import api.store.diglog.common.auth.JWTUtil;
+import api.store.diglog.model.constant.Role;
+import api.store.diglog.model.dto.comment.CommentRequest;
+import api.store.diglog.model.dto.comment.CommentUpdateRequest;
+import api.store.diglog.model.entity.Comment;
+import api.store.diglog.model.entity.Member;
+import api.store.diglog.model.entity.Post;
+import api.store.diglog.repository.CommentRepository;
+import api.store.diglog.repository.MemberRepository;
+import api.store.diglog.repository.PostRepository;
+import api.store.diglog.supporter.RedisTestSupporter;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-class CommentControllerTest {
+class CommentControllerTest extends RedisTestSupporter {
 
 	@Autowired
 	private MockMvc mockMvc;

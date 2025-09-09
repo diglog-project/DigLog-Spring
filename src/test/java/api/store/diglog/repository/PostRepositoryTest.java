@@ -19,12 +19,13 @@ import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
+import api.store.diglog.supporter.RedisTestSupporter;
 import jakarta.persistence.EntityManager;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class PostRepositoryTest {
+class PostRepositoryTest extends RedisTestSupporter {
 
 	@Autowired
 	MemberRepository memberRepository;

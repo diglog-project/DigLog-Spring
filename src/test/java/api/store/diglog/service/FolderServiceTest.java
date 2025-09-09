@@ -32,13 +32,14 @@ import api.store.diglog.model.entity.Post;
 import api.store.diglog.repository.FolderRepository;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.PostRepository;
+import api.store.diglog.supporter.RedisTestSupporter;
 import jakarta.persistence.EntityManager;
 
 @SuppressWarnings("ALL")
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class FolderServiceTest {
+class FolderServiceTest extends RedisTestSupporter {
 
 	@Autowired
 	private MemberRepository memberRepository;
