@@ -92,7 +92,7 @@ class PostControllerTest {
 		JsonNode data = objectMapper.readTree(response.getContentAsString());
 
 		// then
-		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(response.getStatus()).isEqualTo(201);
 	}
 
 	@Test
