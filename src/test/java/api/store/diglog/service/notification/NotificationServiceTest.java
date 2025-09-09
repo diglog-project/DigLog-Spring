@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,17 +28,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.notification.NotificationCreateRequest;
+import api.store.diglog.model.dto.notification.NotificationDeleteRequest;
 import api.store.diglog.model.dto.notification.NotificationResponse;
 import api.store.diglog.model.dto.notification.NotificationUnreadCountResponse;
-import api.store.diglog.model.entity.Comment;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
 import api.store.diglog.model.entity.Subscription;
 import api.store.diglog.model.entity.notification.Notification;
-import api.store.diglog.repository.CommentRepository;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.NotificationRepository;
 import api.store.diglog.repository.PostRepository;
@@ -63,9 +64,6 @@ class NotificationServiceTest extends RedisTestSupporter {
 	private PostRepository postRepository;
 
 	@Autowired
-	private CommentRepository commentRepository;
-
-	@Autowired
 	private NotificationService notificationService;
 
 	@Autowired
@@ -78,8 +76,6 @@ class NotificationServiceTest extends RedisTestSupporter {
 	private SseEmitterService sseEmitterService;
 
 	private Member loginMember;
-
-	private final List<Member> users = new ArrayList<>();
 
 	@BeforeEach
 	void setUp() {
@@ -105,23 +101,10 @@ class NotificationServiceTest extends RedisTestSupporter {
 			sseEmitterRepository.deleteBy(loginMember.getId(), emitter);
 		});
 
-		for (Member user : users) {
-			List<SseEmitter> userEmitters = new ArrayList<>(sseEmitterRepository.findById(user.getId()));
-			userEmitters.forEach(emitter -> {
-				try {
-					emitter.complete();
-				} catch (Exception ignored) {
-				}
-				sseEmitterRepository.deleteBy(user.getId(), emitter);
-			});
-		}
-
 		SecurityContextHolder.clearContext();
-		users.clear();
 
 		subscriptionRepository.deleteAllInBatch();
 		notificationRepository.deleteAllInBatch();
-		commentRepository.deleteAllInBatch();
 		postRepository.deleteAllInBatch();
 		memberRepository.deleteAllInBatch();
 	}
@@ -202,20 +185,155 @@ class NotificationServiceTest extends RedisTestSupporter {
 		assertThat(response.getUnreadCount()).isEqualTo(2);
 	}
 
+	@DisplayName("로그인 사용자의 알림을 읽음 처리 할 수 있다")
 	@Test
 	void markAsRead() {
+		// Given
+		Notification notification = createCommentCreationNotification(loginMember, false);
+		notificationRepository.save(notification);
+
+		// When
+		notificationService.markAsRead(notification.getId());
+
+		// Then
+		Notification updatedNotification = notificationRepository.findById(notification.getId()).orElseThrow();
+		assertThat(updatedNotification)
+			.extracting("id", "receiver.id", "isRead")
+			.containsExactly(notification.getId(), loginMember.getId(), true);
 	}
 
+	@DisplayName("다른 사용자의 알림을 읽음 처리를 할 수 없다")
+	@Test
+	void markAsRead_InvalidLoginMember() {
+		// Given
+		Member anotherMember = createMember("anotherMember");
+		memberRepository.save(anotherMember);
+
+		Notification notification = createCommentCreationNotification(anotherMember, false);
+		notificationRepository.save(notification);
+
+		// When, Then
+		assertThatThrownBy(() -> notificationService.markAsRead(notification.getId()))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("해당 알림의 변경 권한이 없습니다.");
+	}
+
+	@DisplayName("로그인 사용자의 알림을 일괄적으로 읽음 처리 할 수 있다")
 	@Test
 	void markAllAsRead() {
+		// Given
+		Notification commentNotification = createCommentCreationNotification(loginMember, false);
+		Notification postCreationNotification01 = createPostCreationNotification(loginMember, true);
+		Notification postCreationNotification02 = createPostCreationNotification(loginMember, false);
+		notificationRepository.saveAll(
+			List.of(commentNotification, postCreationNotification01, postCreationNotification02)
+		);
+
+		// When
+		notificationService.markAllAsRead();
+
+		// Then
+		List<Notification> updatedNotifications = notificationRepository.findAll();
+		assertThat(updatedNotifications).hasSize(3)
+			.extracting("id", "receiver.id", "isRead")
+			.containsExactlyInAnyOrder(
+				tuple(commentNotification.getId(), loginMember.getId(), true),
+				tuple(postCreationNotification01.getId(), loginMember.getId(), true),
+				tuple(postCreationNotification02.getId(), loginMember.getId(), true)
+			);
 	}
 
+	@DisplayName("로그인 사용자의 알림을 삭제할 수 있다")
 	@Test
 	void delete() {
+		// Given
+		Notification notification = createCommentCreationNotification(loginMember, false);
+		notificationRepository.save(notification);
+
+		// When
+		notificationService.delete(notification.getId());
+
+		// Then
+		boolean exists = notificationRepository.existsById(notification.getId());
+		assertThat(exists).isFalse();
 	}
 
+	@DisplayName("로그인 사용자는 다른 사용자의 알림을 삭제할 수 없다")
+	@Test
+	void delete_InvalidLoginMember() {
+		// Given
+		Member anotherMember = createMember("anotherMember");
+		memberRepository.save(anotherMember);
+
+		Notification notification = createCommentCreationNotification(anotherMember, false);
+		notificationRepository.save(notification);
+
+		// When, Then
+		assertThatThrownBy(() -> notificationService.delete(notification.getId()))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("해당 알림의 변경 권한이 없습니다.");
+	}
+
+	@DisplayName("로그인 사용자의 다건 알림을 삭제할 수 있다")
 	@Test
 	void deleteAll() {
+		// Given
+		List<Notification> notifications = List.of(
+			createCommentCreationNotification(loginMember, false),
+			createPostCreationNotification(loginMember, true),
+			createPostCreationNotification(loginMember, true)
+		);
+		notificationRepository.saveAll(notifications);
+
+		Set<UUID> ids = notifications.stream()
+			.map(Notification::getId)
+			.collect(Collectors.toSet());
+		NotificationDeleteRequest request = NotificationDeleteRequest.builder()
+			.notificationIds(ids)
+			.build();
+
+		// When
+		notificationService.deleteAll(request);
+
+		// Then
+		List<Notification> deletedNotifications = notificationRepository.findAllById(request.getNotificationIds());
+		assertThat(deletedNotifications).isEmpty();
+	}
+
+	@DisplayName("다건 알림 삭제 중 다른 사람의 알림이 섞여 있을 경우, 요청한 모든 알림은 삭제되지 않는다")
+	@Test
+	void deleteAll_ContainsOtherNotification() {
+		// Given
+		Member anotherMember = createMember("anotherMember");
+		memberRepository.save(anotherMember);
+
+		List<Notification> notifications = List.of(
+			createCommentCreationNotification(loginMember, false),
+			createPostCreationNotification(loginMember, true),
+			createPostCreationNotification(anotherMember, true)
+		);
+		notificationRepository.saveAll(notifications);
+
+		Set<UUID> ids = notifications.stream()
+			.map(Notification::getId)
+			.collect(Collectors.toSet());
+		NotificationDeleteRequest request = NotificationDeleteRequest.builder()
+			.notificationIds(ids)
+			.build();
+
+		// When, Then
+		assertThatThrownBy(() -> notificationService.deleteAll(request))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("해당 알림의 변경 권한이 없습니다.");
+
+		List<Notification> allNotification = notificationRepository.findAll();
+		assertThat(allNotification).hasSize(3)
+			.extracting("id", "receiver.id", "notificationType", "isRead")
+			.containsExactlyInAnyOrder(
+				tuple(notifications.getFirst().getId(), loginMember.getId(), COMMENT_CREATION, false),
+				tuple(notifications.get(1).getId(), loginMember.getId(), POST_CREATION, true),
+				tuple(notifications.get(2).getId(), anotherMember.getId(), POST_CREATION, true)
+			);
 	}
 
 	private Member createMember(String userName) {
@@ -247,14 +365,6 @@ class NotificationServiceTest extends RedisTestSupporter {
 			.notificationEnabled(notificationEnabled)
 			.build();
 
-	}
-
-	private Comment createComment(Post post, Member commenter) {
-		return Comment.builder()
-			.post(post)
-			.member(commenter)
-			.content("comment content")
-			.build();
 	}
 
 	private Notification createCommentCreationNotification(Member receiver, boolean isRead) {
