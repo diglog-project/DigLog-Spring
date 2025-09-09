@@ -96,7 +96,7 @@ class SseEmitterServiceTest extends RedisTestSupporter {
 
 	@Test
 	@DisplayName("사용자가 SSE 구독 시 정상적으로 연결되고 emitter가 저장된다")
-	void subscribe_ShouldReturnSseEmitterAndSendInitialMessage() {
+	void subscribe_ShouldReturnSseEmitter() {
 		// When
 		SseEmitter emitter = sseEmitterService.subscribe();
 
@@ -165,18 +165,22 @@ class SseEmitterServiceTest extends RedisTestSupporter {
 		UUID nonExistentUserId = UUID.randomUUID();
 		String testMessage = "Test message";
 
-		// When & Then - 예외 발생하지 않고 조용히 무시되어야 함
+		// When, Then
 		assertThatCode(() -> sseEmitterService.send(nonExistentUserId, testMessage))
 			.doesNotThrowAnyException();
+		assertThat(sseEmitterRepository.findById(nonExistentUserId)).isEmpty();
 	}
 
 	@Test
 	@DisplayName("일부 emitter에서 에러 발생 시 해당 emitter만 제거된다")
-	void send_PartialFailure_ShouldRemoveOnlyFailedEmitters() {
+	void send_PartialFailure_ShouldRemoveOnlyFailedEmitters() throws IOException {
 		// Given
 		SseEmitter workingEmitter = sseEmitterService.subscribe();
-		SseEmitter faultyEmitter = sseEmitterService.subscribe();
-		faultyEmitter.complete();
+		SseEmitter faultyEmitter = mock(SseEmitter.class);
+		sseEmitterRepository.save(testUserId, faultyEmitter);
+		doThrow(new IOException("send failed"))
+			.when(faultyEmitter)
+			.send(any(SseEmitter.SseEventBuilder.class));
 
 		// When
 		sseEmitterService.send(testUserId, "test message");
@@ -198,7 +202,6 @@ class SseEmitterServiceTest extends RedisTestSupporter {
 			CountDownLatch startLatch = new CountDownLatch(1);
 			CountDownLatch doneLatch = new CountDownLatch(userCount);
 
-			// 테스트용 사용자들 생성
 			for (int i = 0; i < userCount; i++) {
 				Member user = createMember("username" + i);
 				memberRepository.save(user);
@@ -210,7 +213,6 @@ class SseEmitterServiceTest extends RedisTestSupporter {
 				final int index = i;
 				executor.submit(() -> {
 					try {
-						// 각 스레드별로 별도의 SecurityContext 설정
 						Authentication auth = new UsernamePasswordAuthenticationToken(
 							users.get(index).getEmail(),
 							"password",
@@ -237,7 +239,7 @@ class SseEmitterServiceTest extends RedisTestSupporter {
 			executor.shutdown();
 		}
 
-		// Then - 각 사용자별로 emitter가 생성되어야 함
+		// Then
 		for (Member user : users) {
 			assertThat(sseEmitterRepository.findById(user.getId())).hasSize(1);
 		}
@@ -254,11 +256,10 @@ class SseEmitterServiceTest extends RedisTestSupporter {
 			CountDownLatch startLatch = new CountDownLatch(1);
 			CountDownLatch doneLatch = new CountDownLatch(deviceCount);
 
-			// When - 동시에 여러 디바이스에서 구독
+			// When
 			for (int i = 0; i < deviceCount; i++) {
 				executor.submit(() -> {
 					try {
-						// 같은 사용자로 SecurityContext 설정
 						Authentication auth = new UsernamePasswordAuthenticationToken(
 							"loginMember@example.com",
 							"password",
