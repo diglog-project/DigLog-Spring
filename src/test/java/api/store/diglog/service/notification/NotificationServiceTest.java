@@ -2,8 +2,8 @@ package api.store.diglog.service.notification;
 
 import static api.store.diglog.model.entity.notification.NotificationType.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.*;
 import static org.mockito.Mockito.*;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
