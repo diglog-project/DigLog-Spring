@@ -4,6 +4,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.Getter;
 
 @Getter
@@ -30,5 +32,23 @@ public class ErrorResponse {
 
 		this.code = errorCode;
 		this.message = objectError.getDefaultMessage();
+	}
+
+	// 메소드 파라미터 유효성 검증 에러 -> ErrorResponse
+	public ErrorResponse(ConstraintViolationException e) {
+		ConstraintViolation<?> violation = e.getConstraintViolations().iterator().next();
+
+		String propertyPath = violation.getPropertyPath().toString();
+		String paramName = "PARAMETER";
+
+		if (propertyPath.contains(".")) {
+			String[] pathParts = propertyPath.split("\\.");
+			if (pathParts.length > 1) {
+				paramName = pathParts[pathParts.length - 1].toUpperCase();
+			}
+		}
+
+		this.code = "VALIDATION_" + paramName;
+		this.message = violation.getMessage();
 	}
 }
