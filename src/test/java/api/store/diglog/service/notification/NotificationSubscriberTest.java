@@ -1,7 +1,7 @@
 package api.store.diglog.service.notification;
 
+import static org.awaitility.Awaitility.*;
 import static org.mockito.Mockito.*;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.*;
 
 import java.time.Duration;
 import java.util.List;
