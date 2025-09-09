@@ -1,10 +1,8 @@
 package api.store.diglog.controller;
 
-import static java.util.Arrays.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDateTime;
@@ -76,7 +74,6 @@ class SubscriptionControllerTest {
 				.param("size", "20")
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.content[0].subscriptionId").value(subscription.getId().toString()))
 			.andExpect(jsonPath("$.content[0].authorName").value("author"))
@@ -94,7 +91,7 @@ class SubscriptionControllerTest {
 		Subscription subscription01 = createSubscription(author, subscriber01, true);
 		Subscription subscription02 = createSubscription(author, subscriber02, true);
 
-		List<SubscriberResponse> responses = asList(
+		List<SubscriberResponse> responses = List.of(
 			SubscriberResponse.from(subscription01),
 			SubscriberResponse.from(subscription02)
 		);
@@ -110,7 +107,6 @@ class SubscriptionControllerTest {
 				.param("size", "20")
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.content[0].subscriptionId").value(subscription01.getId().toString()))
 			.andExpect(jsonPath("$.content[0].subscriberName").value(subscription01.getSubscriber().getUsername()))
@@ -140,7 +136,6 @@ class SubscriptionControllerTest {
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.subscriptionId").value(subscription.getId().toString()))
 			.andExpect(jsonPath("$.hasSubscription").value(true));
@@ -172,7 +167,6 @@ class SubscriptionControllerTest {
 				.content(objectMapper.writeValueAsString(request))
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.authorName").value("author"))
 			.andExpect(jsonPath("$.subscriberName").value("loginMember"))
@@ -206,7 +200,6 @@ class SubscriptionControllerTest {
 					.content(objectMapper.writeValueAsString(request))
 					.contentType(MediaType.APPLICATION_JSON)
 					.accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isNoContent());
 	}
 
@@ -229,7 +222,6 @@ class SubscriptionControllerTest {
 					.with(csrf())
 					.contentType(MediaType.APPLICATION_JSON)
 					.accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isNoContent());
 
 	}
