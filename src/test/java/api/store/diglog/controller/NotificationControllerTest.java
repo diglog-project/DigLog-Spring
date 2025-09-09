@@ -6,7 +6,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDateTime;
@@ -106,6 +105,8 @@ class NotificationControllerTest {
 			.andExpect(jsonPath("$.content[0].notificationType").value("POST_CREATION"))
 			.andExpect(jsonPath("$.content[0].message").value("알림 생성"))
 			.andExpect(jsonPath("$.content[0].isRead").value(false));
+
+		verify(notificationService).searchBy(0, 20);
 	}
 
 	@DisplayName("페이지 파라미터가 음수인 경우 유효성 검증에 실패한다.")
@@ -118,7 +119,6 @@ class NotificationControllerTest {
 				.param("size", "20")
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isBadRequest());
 	}
 
@@ -244,21 +244,20 @@ class NotificationControllerTest {
 	@WithMockUser(username = EMAIL, password = PASSWORD)
 	void delete_LoginMember() throws Exception {
 		// given
-		Member loginMember = createMember("loginMember");
-		Notification notification = createNotification(loginMember, POST_CREATION, true);
+		UUID notificationId = UUID.randomUUID();
 
 		BDDMockito.doNothing()
 			.when(notificationService)
-			.delete(notification.getId());
+			.delete(notificationId);
 
 		// when, then
-		mockMvc.perform(delete("/api/notifications/{notificationId}", notification.getId())
+		mockMvc.perform(delete("/api/notifications/{notificationId}", notificationId)
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isNoContent());
 
-		verify(notificationService).delete(notification.getId());
+		verify(notificationService).delete(notificationId);
 	}
 
 	@DisplayName("여러 알림을 일괄 삭제할 수 있다.")
