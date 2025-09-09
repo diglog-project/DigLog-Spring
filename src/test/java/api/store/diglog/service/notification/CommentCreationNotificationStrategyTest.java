@@ -103,7 +103,7 @@ class CommentCreationNotificationStrategyTest {
 			.hasMessage("게시글과 댓글의 작성자가 일치하는 경우엔 알림이 생성되지 않습니다.");
 	}
 
-	@DisplayName("댓글 알림 메세지를 생성할 수 있다")
+	@DisplayName("댓글 알림 메시지를 생성할 수 있다")
 	@Test
 	void generateMessage() {
 		// Given
@@ -126,7 +126,7 @@ class CommentCreationNotificationStrategyTest {
 		);
 	}
 
-	@DisplayName("댓글이 없는 경우, 알림 메세지를 생성할 수 없다")
+	@DisplayName("댓글이 없는 경우, 알림 메시지를 생성할 수 없다")
 	@Test
 	void generateMessage_NotExistComment() {
 		// When, Then

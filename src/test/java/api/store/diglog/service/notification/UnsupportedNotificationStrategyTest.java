@@ -23,7 +23,7 @@ class UnsupportedNotificationStrategyTest {
 	@Autowired
 	private UnsupportedNotificationStrategy unsupportedNotificationStrategy;
 
-	@DisplayName("지원하지 알림 전략 객체의 알림 타입을 조회할 수 있다")
+	@DisplayName("지원하지 않는 알림 전략 객체의 알림 타입을 조회할 수 있다")
 	@Test
 	void getType() {
 		// When
@@ -33,7 +33,7 @@ class UnsupportedNotificationStrategyTest {
 		assertThat(notificationType).isEqualTo(INVALID);
 	}
 
-	@DisplayName("지원하지 알림 전략 객체는 알림 수신자를 조회할 수 없다")
+	@DisplayName("지원하지 않는 알림 전략 객체는 알림 수신자를 조회할 수 없다")
 	@Test
 	void resolveReceivers() {
 		// When, Then
@@ -42,7 +42,7 @@ class UnsupportedNotificationStrategyTest {
 			.hasMessage("지원하지 않는 알림 타입입니다.");
 	}
 
-	@DisplayName("지원하지 알림 전략 객체는 알림 메세지를 생성할 수 없다")
+	@DisplayName("지원하지 않는 알림 전략 객체는 알림 메세지를 생성할 수 없다")
 	@Test
 	void generateMessage() {
 		// When, Then

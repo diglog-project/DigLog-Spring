@@ -41,7 +41,7 @@ class NotificationTest {
 			.containsExactly(notificationId, receiver, POST_CREATION, "게시글 생성 알림", false);
 	}
 
-	@DisplayName("지원하지 알림 타입으로는 알림을 생성할 수 없다")
+	@DisplayName("지원하지 않는 알림 타입으로는 알림을 생성할 수 없다")
 	@Test
 	void create_InvalidNotificationType() {
 		// Given
