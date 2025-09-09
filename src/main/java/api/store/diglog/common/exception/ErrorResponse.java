@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 import lombok.Getter;
 
 @Getter
@@ -36,19 +37,26 @@ public class ErrorResponse {
 
 	// 메소드 파라미터 유효성 검증 에러 -> ErrorResponse
 	public ErrorResponse(ConstraintViolationException e) {
-		ConstraintViolation<?> violation = e.getConstraintViolations().iterator().next();
+		ConstraintViolation<?> violation = e.getConstraintViolations().stream().findFirst().orElse(null);
 
-		String propertyPath = violation.getPropertyPath().toString();
 		String paramName = "PARAMETER";
+		String message = "Validation failed";
 
-		if (propertyPath.contains(".")) {
-			String[] pathParts = propertyPath.split("\\.");
-			if (pathParts.length > 1) {
-				paramName = pathParts[pathParts.length - 1].toUpperCase();
+		if (violation != null) {
+			String leaf = null;
+			for (Path.Node node : violation.getPropertyPath()) {
+				leaf = node.getName();
+			}
+			if (leaf != null && !leaf.isBlank()) {
+				paramName = leaf.toUpperCase();
+			}
+
+			if (violation.getMessage() != null && !violation.getMessage().isBlank()) {
+				message = violation.getMessage();
 			}
 		}
 
 		this.code = "VALIDATION_" + paramName;
-		this.message = violation.getMessage();
+		this.message = message;
 	}
 }
