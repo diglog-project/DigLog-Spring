@@ -142,7 +142,7 @@ class PostCreationNotificationStrategyTest {
 	@Test
 	void generateMessage_NotExistPost() {
 		// When, Then
-		assertThatThrownBy(() -> postCreationNotificationStrategy.resolveReceivers(UUID.randomUUID()))
+		assertThatThrownBy(() -> postCreationNotificationStrategy.generateMessage(UUID.randomUUID()))
 			.isInstanceOf(CustomException.class)
 			.hasMessage("해당 게시글이 없습니다.");
 	}

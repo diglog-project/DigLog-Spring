@@ -291,7 +291,7 @@ class SseEmitterServiceTest extends RedisTestSupporter {
 		// Then
 		assertThat(emitters).hasSize(deviceCount);
 		assertThat(sseEmitterRepository.findById(testUserId)).hasSize(deviceCount)
-			.containsAnyElementsOf(emitters);
+			.containsExactlyInAnyOrderElementsOf(emitters);
 	}
 
 	private Member createMember(String userName) {
