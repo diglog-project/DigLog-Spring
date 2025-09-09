@@ -21,7 +21,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PostLoad;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -69,14 +70,15 @@ public class Notification {
 	private boolean isRead;
 
 	@CreatedDate
-	@Column(name = "created_at",nullable = false, updatable = false)
+	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
 	public void markAsRead() {
 		this.isRead = true;
 	}
 
-	@PostLoad
+	@PrePersist
+	@PreUpdate
 	private void validateAfterLoad() {
 		validateNotificationType(this.notificationType);
 	}
