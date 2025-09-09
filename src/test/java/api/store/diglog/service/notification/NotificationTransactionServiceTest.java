@@ -23,6 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.common.exception.CustomException;
+import api.store.diglog.common.exception.ErrorCode;
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.notification.NotificationCreateRequest;
@@ -244,6 +245,8 @@ class NotificationTransactionServiceTest {
 		// When, Then
 		assertThatThrownBy(() -> notificationTransactionService.markAsRead(notification.getId()))
 			.isInstanceOf(CustomException.class)
+			.satisfies(ex -> assertThat(((CustomException)ex).getErrorCode())
+				.isSameAs(ErrorCode.NOTIFICATION_NO_PERMISSION))
 			.hasMessage("해당 알림의 변경 권한이 없습니다.");
 	}
 
@@ -300,6 +303,8 @@ class NotificationTransactionServiceTest {
 		// When, Then
 		assertThatThrownBy(() -> notificationTransactionService.delete(notification.getId()))
 			.isInstanceOf(CustomException.class)
+			.satisfies(ex -> assertThat(((CustomException)ex).getErrorCode())
+				.isSameAs(ErrorCode.NOTIFICATION_NO_PERMISSION))
 			.hasMessage("해당 알림의 변경 권한이 없습니다.");
 	}
 
@@ -353,6 +358,8 @@ class NotificationTransactionServiceTest {
 		// When, Then
 		assertThatThrownBy(() -> notificationTransactionService.deleteAll(request))
 			.isInstanceOf(CustomException.class)
+			.satisfies(ex -> assertThat(((CustomException)ex).getErrorCode())
+				.isSameAs(ErrorCode.NOTIFICATION_NO_PERMISSION))
 			.hasMessage("해당 알림의 변경 권한이 없습니다.");
 
 		List<Notification> allNotification = notificationRepository.findAll();
