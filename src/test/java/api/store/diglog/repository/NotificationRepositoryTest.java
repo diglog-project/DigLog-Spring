@@ -62,7 +62,10 @@ class NotificationRepositoryTest {
 
 		// Then
 		assertThat(findNotifications.getContent()).hasSize(readCount + unreadCount)
-			.containsExactlyInAnyOrderElementsOf(notifications);
+			.extracting(Notification::getId)
+			.containsExactlyInAnyOrderElementsOf(
+				notifications.stream().map(Notification::getId).toList()
+			);
 	}
 
 	@DisplayName("사용자가 읽지 않은 알림 목록을 조회할 수 있다")
@@ -87,7 +90,10 @@ class NotificationRepositoryTest {
 
 		// Then
 		assertThat(notifications).hasSize(unreadCount)
-			.containsExactlyInAnyOrderElementsOf(unreadNotifications);
+			.extracting(Notification::getId)
+			.containsExactlyInAnyOrderElementsOf(
+				unreadNotifications.stream().map(Notification::getId).toList()
+			);
 	}
 
 	@DisplayName("읽지 않은 알람의 개수를 집계할 수 있다")
