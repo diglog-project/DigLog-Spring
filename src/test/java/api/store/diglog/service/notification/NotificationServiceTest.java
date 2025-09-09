@@ -123,7 +123,8 @@ class NotificationServiceTest extends RedisTestSupporter {
 		Post post = createPost(author);
 		postRepository.save(post);
 
-		sseEmitterRepository.save(loginMember.getId(), new SseEmitter());
+		SseEmitter emitter = new SseEmitter(2_000L);
+		sseEmitterRepository.save(loginMember.getId(), emitter);
 
 		NotificationCreateRequest request = NotificationCreateRequest.builder()
 			.notificationType("POST_CREATION")
@@ -141,6 +142,9 @@ class NotificationServiceTest extends RedisTestSupporter {
 				eq(author.getUsername() + "님이 \"" + post.getTitle() + "\" 게시글을 작성했습니다.")
 			);
 		});
+
+		// cleanup
+		sseEmitterRepository.deleteBy(receiver.getId(), emitter);
 	}
 
 	@DisplayName("로그인 사용자의 알림 목록(페이지 단위)을 조회할 수 있다.")
