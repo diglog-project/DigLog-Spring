@@ -3,6 +3,7 @@ package api.store.diglog.model.entity.notification;
 import static api.store.diglog.model.entity.notification.NotificationType.*;
 import static org.assertj.core.api.Assertions.*;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +21,14 @@ class NotificationTypeTest {
 		NotificationType notificationType = NotificationType.from(inputType);
 
 		// Then
-		assertThat(notificationType).isEqualTo(expectedType);
+		assertThat(notificationType).isSameAs(expectedType);
+	}
+
+	@DisplayName("모든 Enum 이름은 from으로 역직렬화된다")
+	@ParameterizedTest(name = "{0} -> {1}")
+	@MethodSource("provideCanonicalNotificationTypes")
+	void from_canonicalNames_roundTrip(String canonical, NotificationType expected) {
+		assertThat(NotificationType.from(canonical)).isSameAs(expected);
 	}
 
 	private static Stream<Arguments> provideNotificationTypes() {
@@ -35,5 +43,11 @@ class NotificationTypeTest {
 			Arguments.of("", INVALID),
 			Arguments.of("   ", INVALID)
 		);
+	}
+
+	private static Stream<Arguments> provideCanonicalNotificationTypes() {
+		return Arrays.stream(NotificationType.values())
+			.filter(t -> t != INVALID)
+			.map(t -> Arguments.of(t.name(), t));
 	}
 }
