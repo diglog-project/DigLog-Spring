@@ -16,17 +16,11 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
@@ -39,25 +33,11 @@ import api.store.diglog.model.dto.notification.NotificationUnreadCountResponse;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.notification.Notification;
 import api.store.diglog.model.entity.notification.NotificationType;
-import api.store.diglog.service.SseEmitterService;
-import api.store.diglog.service.notification.NotificationService;
+import api.store.diglog.supporter.ControllerTestSupport;
 
-@WebMvcTest(controllers = NotificationController.class)
-class NotificationControllerTest {
+class NotificationControllerTest extends ControllerTestSupport {
 	private static final String EMAIL = "loginMember@example.com";
 	private static final String PASSWORD = "loginMemberPassword";
-
-	@Autowired
-	private MockMvc mockMvc;
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@MockitoBean
-	private NotificationService notificationService;
-
-	@MockitoBean
-	private SseEmitterService sseEmitterService;
 
 	@DisplayName("SSE 구독을 할 수 있다.")
 	@Test

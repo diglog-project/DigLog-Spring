@@ -14,16 +14,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
@@ -35,22 +29,12 @@ import api.store.diglog.model.dto.subscribe.SubscriptionNotificationActivationRe
 import api.store.diglog.model.dto.subscribe.SubscriptionResponse;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Subscription;
-import api.store.diglog.service.SubscriptionService;
+import api.store.diglog.supporter.ControllerTestSupport;
 
-@WebMvcTest(controllers = SubscriptionController.class)
-class SubscriptionControllerTest {
+class SubscriptionControllerTest extends ControllerTestSupport {
 
 	private static final String EMAIL = "loginMember@example.com";
 	private static final String PASSWORD = "loginMemberPassword";
-
-	@Autowired
-	private MockMvc mockMvc;
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@MockitoBean
-	private SubscriptionService subscriptionService;
 
 	@DisplayName("사용자의 구독 목록을 조회할 수 있다.")
 	@Test
