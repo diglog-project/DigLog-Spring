@@ -12,50 +12,21 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import api.store.diglog.common.auth.JWTUtil;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.comment.CommentRequest;
 import api.store.diglog.model.dto.comment.CommentUpdateRequest;
 import api.store.diglog.model.entity.Comment;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
-import api.store.diglog.repository.CommentRepository;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.repository.PostRepository;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
-class CommentControllerTest extends RedisTestSupporter {
-
-	@Autowired
-	private MockMvc mockMvc;
-	private final ObjectMapper objectMapper = new ObjectMapper();
-
-	@Autowired
-	private CommentRepository commentRepository;
-	@Autowired
-	private MemberRepository memberRepository;
-	@Autowired
-	private PostRepository postRepository;
-	@Autowired
-	private JWTUtil jwtUtil;
-	@Autowired
-	PasswordEncoder passwordEncoder;
+class CommentControllerTest extends IntegrationTestSupport {
 
 	@BeforeEach
 	void beforeEach() {

@@ -1,7 +1,6 @@
 package api.store.diglog.service;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,11 +11,10 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.common.exception.CustomException;
@@ -29,52 +27,34 @@ import api.store.diglog.model.dto.folder.FolderResponse;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
-import api.store.diglog.repository.FolderRepository;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.repository.PostRepository;
-import api.store.diglog.supporter.RedisTestSupporter;
-import jakarta.persistence.EntityManager;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
 @SuppressWarnings("ALL")
-@SpringBootTest
-@ActiveProfiles("test")
+
 @Transactional
-class FolderServiceTest extends RedisTestSupporter {
-
-	@Autowired
-	private MemberRepository memberRepository;
-
-	@MockitoBean
-	private MemberService memberService;
-
-	@Autowired
-	private FolderService folderService;
-
-	@Autowired
-	private FolderRepository folderRepository;
-
-	@Autowired
-	private PostRepository postRepository;
-
-	@Autowired
-	private EntityManager entityManager;
+class FolderServiceTest extends IntegrationTestSupport {
 
 	@BeforeEach
 	void setUp() {
-		Member member = Member.builder()
-			.email("testEmail@gmail.com")
+		Authentication auth = new UsernamePasswordAuthenticationToken(
+			"testEmail@example.com",
+			"testPassword",
+			List.of(new SimpleGrantedAuthority("ROLE_USER"))
+		);
+		SecurityContextHolder.getContext().setAuthentication(auth);
+
+		Member testMember = Member.builder()
+			.email("testEmail@example.com")
 			.username("testUser")
 			.password("testPassword")
-			.roles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN))
+			.roles(Set.of(Role.ROLE_USER))
 			.platform(Platform.SERVER)
 			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
 			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
+			.isDeleted(false)
 			.build();
-
-		memberRepository.save(member);
-
-		BDDMockito.given(memberService.getCurrentMember())
-			.willReturn(member);
+		;
+		memberRepository.save(testMember);
 	}
 
 	@DisplayName("폴더를 조회할 수 있다.")
@@ -134,9 +114,6 @@ class FolderServiceTest extends RedisTestSupporter {
 		);
 		postRepository.saveAll(posts);
 		entityManager.flush();
-
-		BDDMockito.given(memberService.findActiveMemberByUsername(any()))
-			.willReturn(member);
 
 		// when
 		List<FolderPostCountResponse> folderPostCountResponses = folderService.getFoldersWithPostCount(
@@ -574,9 +551,7 @@ class FolderServiceTest extends RedisTestSupporter {
 			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
 			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
 			.build();
-
 		memberRepository.save(member);
-		entityManager.flush();
 
 		Folder folder01 = Folder.builder()
 			.id(UUID.randomUUID())
@@ -586,9 +561,7 @@ class FolderServiceTest extends RedisTestSupporter {
 			.orderIndex(0)
 			.parentFolder(null)
 			.build();
-
 		folderRepository.save(folder01);
-		entityManager.flush();
 
 		List<FolderDeleteRequest> folderDeleteRequests = List.of(
 			FolderDeleteRequest.builder().folderId(folder01.getId()).build()

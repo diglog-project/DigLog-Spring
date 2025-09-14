@@ -13,13 +13,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.common.exception.CustomException;
@@ -33,35 +30,10 @@ import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
 import api.store.diglog.model.entity.Subscription;
 import api.store.diglog.model.entity.notification.Notification;
-import api.store.diglog.repository.CommentRepository;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.repository.NotificationRepository;
-import api.store.diglog.repository.PostRepository;
-import api.store.diglog.repository.SubscriptionRepository;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
 @Transactional
-class NotificationTransactionServiceTest extends RedisTestSupporter {
-
-	@Autowired
-	private MemberRepository memberRepository;
-
-	@Autowired
-	private NotificationRepository notificationRepository;
-
-	@Autowired
-	private SubscriptionRepository subscriptionRepository;
-
-	@Autowired
-	private PostRepository postRepository;
-
-	@Autowired
-	private CommentRepository commentRepository;
-
-	@Autowired
-	private NotificationTransactionService notificationTransactionService;
+class NotificationTransactionServiceTest extends IntegrationTestSupport {
 
 	private Member loginMember;
 

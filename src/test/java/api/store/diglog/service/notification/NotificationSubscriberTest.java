@@ -13,43 +13,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mock;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import api.store.diglog.model.dto.notification.NotificationPayload;
-import api.store.diglog.service.SseEmitterService;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class NotificationSubscriberTest extends RedisTestSupporter {
-
-	@Autowired
-	private StringRedisTemplate redisTemplate;
-
-	@MockitoSpyBean
-	private SseEmitterService spySseEmitterService;
-
-	@Autowired
-	private ChannelTopic notificationChannelTopic;
-
-	@Mock
-	private Appender<ILoggingEvent> mockAppender;
-
-	private static final ObjectMapper objectMapper = new ObjectMapper();
+class NotificationSubscriberTest extends IntegrationTestSupport {
 
 	@DisplayName("Redis PUB/SUB을 이용해 서버에서 알림 메세지를 수신할 수 있다.")
 	@Test

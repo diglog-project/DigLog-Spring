@@ -18,34 +18,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.entity.Member;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.repository.SseEmitterRepository;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class SseEmitterServiceTest extends RedisTestSupporter {
-
-	@Autowired
-	private SseEmitterService sseEmitterService;
-
-	@Autowired
-	private SseEmitterRepository sseEmitterRepository;
-
-	@Autowired
-	private MemberRepository memberRepository;
+class SseEmitterServiceTest extends IntegrationTestSupport {
 
 	private Member loginMember;
 

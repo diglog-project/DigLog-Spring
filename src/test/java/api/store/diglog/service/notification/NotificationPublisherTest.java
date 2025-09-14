@@ -14,10 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.model.constant.Platform;
@@ -25,22 +21,10 @@ import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.notification.Notification;
 import api.store.diglog.model.entity.notification.NotificationType;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
 @Transactional
-class NotificationPublisherTest extends RedisTestSupporter {
-
-	@Autowired
-	private NotificationPublisher notificationPublisher;
-
-	@Autowired
-	private MemberRepository memberRepository;
-
-	@MockitoSpyBean
-	private NotificationSubscriber notificationSubscriber;
+class NotificationPublisherTest extends IntegrationTestSupport {
 
 	@Test
 	@DisplayName("NotificationPublisher가 Redis Pub/Sub 채널에 메시지를 발행한다")

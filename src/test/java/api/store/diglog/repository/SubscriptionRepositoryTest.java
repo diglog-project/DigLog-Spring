@@ -10,30 +10,19 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Subscription;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
 @Transactional
-class SubscriptionRepositoryTest extends RedisTestSupporter {
-
-	@Autowired
-	MemberRepository memberRepository;
-
-	@Autowired
-	SubscriptionRepository subscriptionRepository;
+class SubscriptionRepositoryTest extends IntegrationTestSupport {
 
 	@DisplayName("구독 id를 이용해 구독 내역을 조회할 수 있다.")
 	@Test

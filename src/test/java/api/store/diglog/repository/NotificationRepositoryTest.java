@@ -11,30 +11,19 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.notification.Notification;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
 @Transactional
-class NotificationRepositoryTest extends RedisTestSupporter {
-
-	@Autowired
-	NotificationRepository notificationRepository;
-
-	@Autowired
-	MemberRepository memberRepository;
+class NotificationRepositoryTest extends IntegrationTestSupport {
 
 	@DisplayName("사용자의 알림 목록(페이지 단위)을 조회할 수 있다")
 	@Test

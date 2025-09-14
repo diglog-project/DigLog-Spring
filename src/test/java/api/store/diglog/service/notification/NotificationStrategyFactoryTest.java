@@ -9,19 +9,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import api.store.diglog.model.entity.notification.NotificationType;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class NotificationStrategyFactoryTest extends RedisTestSupporter {
-
-	@Autowired
-	private NotificationStrategyFactory notificationStrategyFactory;
+class NotificationStrategyFactoryTest extends IntegrationTestSupport {
 
 	@DisplayName("알림 타입에 맞는 전략 객체를 조회할 수 있다.")
 	@ParameterizedTest(name = "{0} 타입은 {1} 전략으로 매핑된다")

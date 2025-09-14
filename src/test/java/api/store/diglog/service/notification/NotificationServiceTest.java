@@ -18,13 +18,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -45,11 +43,9 @@ import api.store.diglog.repository.PostRepository;
 import api.store.diglog.repository.SseEmitterRepository;
 import api.store.diglog.repository.SubscriptionRepository;
 import api.store.diglog.service.SseEmitterService;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class NotificationServiceTest extends RedisTestSupporter {
+class NotificationServiceTest extends IntegrationTestSupport {
 
 	@Autowired
 	private MemberRepository memberRepository;

@@ -1,50 +1,26 @@
 package api.store.diglog.controller;
 
-import api.store.diglog.common.auth.JWTUtil;
-import api.store.diglog.model.constant.Role;
-import api.store.diglog.model.dto.member.MemberUsernameRequest;
-import api.store.diglog.model.entity.Member;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.supporter.RedisTestSupporter;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.Set;
+import com.fasterxml.jackson.databind.JsonNode;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import api.store.diglog.model.constant.Role;
+import api.store.diglog.model.dto.member.MemberUsernameRequest;
+import api.store.diglog.model.entity.Member;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
-class MemberControllerTest extends RedisTestSupporter {
-
-	@Autowired
-	private MockMvc mockMvc;
-	private final ObjectMapper objectMapper = new ObjectMapper();
-
-	@Autowired
-	private MemberRepository memberRepository;
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-	@Autowired
-	private JWTUtil jwtUtil;
+class MemberControllerTest extends IntegrationTestSupport {
 
 	@BeforeEach
 	void beforeEach() {

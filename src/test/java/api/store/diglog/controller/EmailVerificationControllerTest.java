@@ -9,36 +9,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import api.store.diglog.model.dto.emailVerification.EmailVerificationRequest;
 import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequest;
 import api.store.diglog.model.entity.EmailVerification;
-import api.store.diglog.repository.EmailVerificationRepository;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
-class EmailVerificationControllerTest extends RedisTestSupporter {
-
-	@Autowired
-	private MockMvc mockMvc;
-	private final ObjectMapper objectMapper = new ObjectMapper();
-
-	@Autowired
-	private EmailVerificationRepository emailVerificationRepository;
-	@Autowired
-	private MemberRepository memberRepository;
+class EmailVerificationControllerTest extends IntegrationTestSupport {
 
 	@BeforeEach
 	void beforeEach() {

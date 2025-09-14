@@ -10,9 +10,6 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.common.exception.CustomException;
@@ -22,27 +19,10 @@ import api.store.diglog.model.entity.Comment;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
 import api.store.diglog.model.entity.notification.NotificationType;
-import api.store.diglog.repository.CommentRepository;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.repository.PostRepository;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
 @Transactional
-class CommentCreationNotificationStrategyTest extends RedisTestSupporter {
-
-	@Autowired
-	private MemberRepository memberRepository;
-
-	@Autowired
-	private PostRepository postRepository;
-
-	@Autowired
-	private CommentRepository commentRepository;
-
-	@Autowired
-	private CommentCreationNotificationStrategy commentCreationNotificationStrategy;
+class CommentCreationNotificationStrategyTest extends IntegrationTestSupport {
 
 	@DisplayName("댓글 알림 전략 객체의 알림 타입을 조회할 수 있다")
 	@Test

@@ -15,14 +15,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.common.exception.CustomException;
@@ -36,23 +33,10 @@ import api.store.diglog.model.dto.subscribe.SubscriptionNotificationActivationRe
 import api.store.diglog.model.dto.subscribe.SubscriptionResponse;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Subscription;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.repository.SubscriptionRepository;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
 @Transactional
-class SubscriptionServiceTest extends RedisTestSupporter {
-
-	@Autowired
-	MemberRepository memberRepository;
-
-	@Autowired
-	SubscriptionRepository subscriptionRepository;
-
-	@Autowired
-	SubscriptionService subscriptionService;
+class SubscriptionServiceTest extends IntegrationTestSupport {
 
 	@BeforeEach
 	void setUp() {

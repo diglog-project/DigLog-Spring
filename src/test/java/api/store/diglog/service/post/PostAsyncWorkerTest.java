@@ -18,35 +18,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
-import api.store.diglog.repository.FolderRepository;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.repository.PostRepository;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-class PostAsyncWorkerTest extends RedisTestSupporter {
-
-	@Autowired
-	private PostAsyncWorker postAsyncWorker;
-	@Autowired
-	private PostRepository postRepository;
-	@Autowired
-	private MemberRepository memberRepository;
-	@Autowired
-	private FolderRepository folderRepository;
-	@Autowired
-	private RedisTemplate<String, String> redisTemplate;
+class PostAsyncWorkerTest extends IntegrationTestSupport {
 
 	private static final String COUNT_PREFIX = "post:view:count:";
 	private static final String DIRTY_SET = "post:view:dirtySet";

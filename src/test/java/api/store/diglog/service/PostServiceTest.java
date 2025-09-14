@@ -25,9 +25,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import api.store.diglog.common.exception.CustomException;
@@ -38,35 +35,10 @@ import api.store.diglog.model.dto.post.PostViewResponse;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
-import api.store.diglog.repository.FolderRepository;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.repository.PostRepository;
-import api.store.diglog.repository.PostViewBatchRepository;
-import api.store.diglog.service.post.PostService;
 import api.store.diglog.service.post.RedisPostViewLoader;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-class PostServiceTest extends RedisTestSupporter {
-
-	@Autowired
-	private MemberRepository memberRepository;
-
-	@Autowired
-	private FolderRepository folderRepository;
-
-	@MockitoSpyBean
-	private PostRepository postRepository;
-
-	@Autowired
-	private PostService postService;
-
-	@MockitoSpyBean
-	private PostViewBatchRepository postViewBatchRepository;
-
-	@Autowired
-	private RedisTemplate<String, String> redisTemplate;
+class PostServiceTest extends IntegrationTestSupport {
 
 	@Autowired
 	private RedissonClient redissonClient;
@@ -347,7 +319,7 @@ class PostServiceTest extends RedisTestSupporter {
 		postService.getViewCount(postId);
 
 		// then
-		verify(postRepository, never()).findById(postId);
+		verify(spyPostRepository, never()).findById(postId);
 	}
 
 	@DisplayName("레디스에 적재되어 있지 않은 게시글의 조회수 증가 동시 요청에도 조회수가 누락되지 않는다.")
