@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class RedisPostViewLoader {
 
 	private static final int LOCK_WAIT_TIME = 3;
-	private static final int LOCK_LEASE_TIME = 1;
 	private static final String LOCK_KEY_SUFFIX = ":lock";
 	private static final int DAILY_TTL_HOURS = 24;
 
@@ -35,7 +34,7 @@ public class RedisPostViewLoader {
 			boolean isLocked = false;
 
 			try {
-				isLocked = viewCountLock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.SECONDS);
+				isLocked = viewCountLock.tryLock(LOCK_WAIT_TIME, TimeUnit.SECONDS);
 
 				if (isLocked) {
 					loadViewCountFromDBToRedis(countKey, postId);
