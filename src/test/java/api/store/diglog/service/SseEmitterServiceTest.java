@@ -13,6 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -181,7 +182,9 @@ class SseEmitterServiceTest extends IntegrationTestSupport {
 	void subscribe_MultipleUsersConcurrently_ShouldHandleSafely() throws InterruptedException {
 		// Given
 		int userCount = 5;
-		try (ExecutorService executor = Executors.newFixedThreadPool(userCount)) {
+		ExecutorService executor = Executors.newFixedThreadPool(userCount);
+
+		try {
 			CountDownLatch readyLatch = new CountDownLatch(userCount);
 			CountDownLatch startLatch = new CountDownLatch(1);
 			CountDownLatch doneLatch = new CountDownLatch(userCount);
@@ -220,7 +223,12 @@ class SseEmitterServiceTest extends IntegrationTestSupport {
 			readyLatch.await();
 			startLatch.countDown();
 			doneLatch.await();
+
+		} finally {
 			executor.shutdown();
+			if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+				executor.shutdownNow();
+			}
 		}
 
 		// Then
@@ -235,7 +243,9 @@ class SseEmitterServiceTest extends IntegrationTestSupport {
 		// Given
 		int deviceCount = 4;
 		List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
-		try (ExecutorService executor = Executors.newFixedThreadPool(deviceCount)) {
+		ExecutorService executor = Executors.newFixedThreadPool(deviceCount);
+
+		try {
 			CountDownLatch readyLatch = new CountDownLatch(deviceCount);
 			CountDownLatch startLatch = new CountDownLatch(1);
 			CountDownLatch doneLatch = new CountDownLatch(deviceCount);
@@ -269,7 +279,12 @@ class SseEmitterServiceTest extends IntegrationTestSupport {
 			readyLatch.await();
 			startLatch.countDown();
 			doneLatch.await();
+
+		} finally {
 			executor.shutdown();
+			if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+				executor.shutdownNow();
+			}
 		}
 
 		// Then

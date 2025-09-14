@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -120,7 +121,9 @@ class SseEmitterRepositoryTest {
 		Queue<SseEmitter> emitters = new ConcurrentLinkedQueue<>();
 
 		int threadCount = 30;
-		try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
+		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+		try {
 			CountDownLatch readyLatch = new CountDownLatch(threadCount);
 			CountDownLatch startLatch = new CountDownLatch(1);
 			CountDownLatch doneLatch = new CountDownLatch(threadCount);
@@ -147,7 +150,11 @@ class SseEmitterRepositoryTest {
 			readyLatch.await();
 			startLatch.countDown();
 			doneLatch.await();
+		} finally {
 			executor.shutdown();
+			if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+				executor.shutdownNow();
+			}
 		}
 
 		// then

@@ -343,7 +343,9 @@ class PostServiceTest extends IntegrationTestSupport {
 		String redisLockKey = countKey + ":lock";
 
 		int threadCount = 30;
-		try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
+		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+		try {
 
 			CountDownLatch readyLatch = new CountDownLatch(threadCount);
 			CountDownLatch startLatch = new CountDownLatch(1);
@@ -375,14 +377,17 @@ class PostServiceTest extends IntegrationTestSupport {
 					}
 				});
 			}
-
 			readyLatch.await();
 
 			lock.unlock();
 			startLatch.countDown();
-
 			doneLatch.await();
+
+		} finally {
 			executor.shutdown();
+			if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+				executor.shutdownNow();
+			}
 		}
 
 		// then
