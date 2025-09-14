@@ -143,6 +143,11 @@ public class MemberService {
 			.orElseThrow(() -> new CustomException(MEMBER_USERNAME_NOT_FOUND));
 	}
 
+	public Member findActiveMemberById(UUID id) {
+		return memberRepository.findByIdAndIsDeletedFalse(id)
+			.orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));
+	}
+
 	public Member findMemberById(UUID memberId) {
 		return memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));

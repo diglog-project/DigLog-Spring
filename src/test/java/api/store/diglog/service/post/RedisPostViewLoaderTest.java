@@ -10,38 +10,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.data.redis.core.RedisCallback;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
-import api.store.diglog.repository.FolderRepository;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.repository.PostRepository;
-import api.store.diglog.supporter.RedisTestSupporter;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-class RedisPostViewLoaderTest extends RedisTestSupporter {
-	@Autowired
-	private MemberRepository memberRepository;
-
-	@Autowired
-	private FolderRepository folderRepository;
-
-	@Autowired
-	private PostRepository postRepository;
-
-	@Autowired
-	private RedisTemplate<String, String> redisTemplate;
-
-	@Autowired
-	private RedisPostViewLoader redisPostViewLoader;
+class RedisPostViewLoaderTest extends IntegrationTestSupport {
 
 	private Member member;
 
@@ -76,7 +54,10 @@ class RedisPostViewLoaderTest extends RedisTestSupporter {
 		postRepository.deleteAllInBatch();
 		folderRepository.deleteAllInBatch();
 		memberRepository.deleteAllInBatch();
-		redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+		redisTemplate.execute((RedisCallback<Void>)conn -> {
+			conn.serverCommands().flushDb();
+			return null;
+		});
 	}
 
 	@DisplayName("레디스에 게시글의 조회수가 없는 경우, DB에서 조회해와서 레디스에 조회수를 적재한다.")

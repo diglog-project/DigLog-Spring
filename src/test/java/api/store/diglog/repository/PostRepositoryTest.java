@@ -9,9 +9,6 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.model.constant.Platform;
@@ -19,24 +16,10 @@ import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
-import jakarta.persistence.EntityManager;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
 @Transactional
-class PostRepositoryTest {
-
-	@Autowired
-	MemberRepository memberRepository;
-
-	@Autowired
-	FolderRepository folderRepository;
-
-	@Autowired
-	PostRepository postRepository;
-
-	@Autowired
-	EntityManager entityManager;
+class PostRepositoryTest extends IntegrationTestSupport {
 
 	@DisplayName("폴더 id를 이용해 게시글 목록을 조회할 수 있다.")
 	@Test

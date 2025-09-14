@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import api.store.diglog.common.exception.CustomException;
@@ -21,11 +21,10 @@ import lombok.RequiredArgsConstructor;
 public class RedisPostViewLoader {
 
 	private static final int LOCK_WAIT_TIME = 3;
-	private static final int LOCK_LEASE_TIME = 1;
 	private static final String LOCK_KEY_SUFFIX = ":lock";
 	private static final int DAILY_TTL_HOURS = 24;
 
-	private final RedisTemplate<String, String> redisTemplate;
+	private final StringRedisTemplate redisTemplate;
 	private final RedissonClient redissonClient;
 	private final PostRepository postRepository;
 
@@ -35,7 +34,7 @@ public class RedisPostViewLoader {
 			boolean isLocked = false;
 
 			try {
-				isLocked = viewCountLock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.SECONDS);
+				isLocked = viewCountLock.tryLock(LOCK_WAIT_TIME, TimeUnit.SECONDS);
 
 				if (isLocked) {
 					loadViewCountFromDBToRedis(countKey, postId);

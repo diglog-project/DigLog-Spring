@@ -1,18 +1,15 @@
 package api.store.diglog.model.entity;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-
-import api.store.diglog.model.constant.Platform;
-import api.store.diglog.model.constant.Role;
-import lombok.*;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import api.store.diglog.model.constant.Platform;
+import api.store.diglog.model.constant.Role;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -25,6 +22,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -45,7 +46,7 @@ public class Member {
 	@Column(nullable = false)
 	private String password;
 
-	@ElementCollection(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.LAZY)
 	@CollectionTable(name = "member_roles", joinColumns = @JoinColumn(name = "member_id"))
 	@Column(name = "role")
 	@Enumerated(EnumType.STRING)
@@ -78,22 +79,25 @@ public class Member {
 		this.updatedAt = updatedAt;
 	}
 
+	public void updateUsername(String username) {
+		this.username = username;
+	}
+
+	public boolean isDifferent(Member other) {
+		return !this.equals(other);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (o == null || getClass() != o.getClass())
+		if (!(o instanceof Member other))
 			return false;
-		Member member = (Member)o;
-		return Objects.equals(id, member.id);
+		return this.getId() != null && this.getId().equals(other.getId());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id);
-	}
-
-	public void updateUsername(String username) {
-		this.username = username;
+		return (getId() != null) ? getId().hashCode() : getClass().hashCode();
 	}
 }

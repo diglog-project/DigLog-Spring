@@ -14,31 +14,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class PostViewBatchRepositoryImplTest {
-
-	@Autowired
-	private PostViewBatchRepository postViewBatchRepository;
-
-	@Autowired
-	private PostRepository postRepository;
-
-	@Autowired
-	private MemberRepository memberRepository;
-
-	@Autowired
-	private FolderRepository folderRepository;
+class PostViewBatchRepositoryImplTest extends IntegrationTestSupport {
 
 	private List<Member> members;
 	private List<Folder> folders;

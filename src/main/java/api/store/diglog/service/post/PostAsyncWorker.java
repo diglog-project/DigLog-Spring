@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ public class PostAsyncWorker {
 	private static final String LOG_VIEW_COUNT_PARSE_FAIL = "[조회수 파싱 실패] postId={}, RedisViewCountValue={}";
 	private static final String LOG_VIEW_COUNT_REVERSED = "[조회수 역전 감지] postId={}, Redis={}, DB={}";
 
-	private final RedisTemplate<String, String> redisTemplate;
+	private final StringRedisTemplate redisTemplate;
 	private final PostViewBatchRepository postViewBatchRepository;
 	private final PostRepository postRepository;
 
@@ -57,7 +57,7 @@ public class PostAsyncWorker {
 				log.error(LOG_VIEW_COUNT_NULL, id);
 				return null;
 			}
-			
+
 			return Map.entry(id, Long.parseLong(redisViewCountValue));
 		} catch (NumberFormatException e) {
 			log.error(LOG_VIEW_COUNT_PARSE_FAIL, id, redisViewCountValue);

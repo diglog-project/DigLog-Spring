@@ -1,6 +1,22 @@
 package api.store.diglog.controller;
 
-import api.store.diglog.common.auth.JWTUtil;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.MvcResult;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.post.PostFolderUpdateRequest;
 import api.store.diglog.model.dto.post.PostRequest;
@@ -9,58 +25,10 @@ import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
 import api.store.diglog.model.entity.Tag;
-import api.store.diglog.repository.FolderRepository;
-import api.store.diglog.repository.MemberRepository;
-import api.store.diglog.repository.PostRepository;
-import api.store.diglog.repository.TagRepository;
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
 @Sql(value = "/sql/post-controller-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class PostControllerTest {
-
-	@Autowired
-	private MockMvc mockMvc;
-	private final ObjectMapper objectMapper = new ObjectMapper();
-
-	@Autowired
-	private MemberRepository memberRepository;
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-	@Autowired
-	private JWTUtil jwtUtil;
-
-	@Autowired
-	PostRepository postRepository;
-	@Autowired
-	private TagRepository tagRepository;
-	@Autowired
-	private FolderRepository folderRepository;
+class PostControllerTest extends IntegrationTestSupport {
 
 	@AfterEach
 	void afterEach() {
@@ -92,7 +60,7 @@ class PostControllerTest {
 		JsonNode data = objectMapper.readTree(response.getContentAsString());
 
 		// then
-		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(response.getStatus()).isEqualTo(201);
 	}
 
 	@Test
