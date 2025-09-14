@@ -10,6 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.core.RedisCallback;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
@@ -53,7 +54,10 @@ class RedisPostViewLoaderTest extends IntegrationTestSupport {
 		postRepository.deleteAllInBatch();
 		folderRepository.deleteAllInBatch();
 		memberRepository.deleteAllInBatch();
-		redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+		redisTemplate.execute((RedisCallback<Void>)conn -> {
+			conn.serverCommands().flushDb();
+			return null;
+		});
 	}
 
 	@DisplayName("레디스에 게시글의 조회수가 없는 경우, DB에서 조회해와서 레디스에 조회수를 적재한다.")

@@ -1,9 +1,9 @@
 package api.store.diglog.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import api.store.diglog.common.exception.CustomException;
@@ -79,7 +80,10 @@ class PostServiceTest extends IntegrationTestSupport {
 		postRepository.deleteAllInBatch();
 		folderRepository.deleteAllInBatch();
 		memberRepository.deleteAllInBatch();
-		redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+		redisTemplate.execute((RedisCallback<Void>)conn -> {
+			conn.serverCommands().flushDb();
+			return null;
+		});
 	}
 
 	@DisplayName("게시글 조회수를 조회할 수 있다.")

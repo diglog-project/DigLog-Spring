@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisCallback;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -23,6 +25,14 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
 class NotificationSubscriberTest extends IntegrationTestSupport {
+
+	@AfterEach
+	void tearDown() {
+		redisTemplate.execute((RedisCallback<Void>)conn -> {
+			conn.serverCommands().flushDb();
+			return null;
+		});
+	}
 
 	@DisplayName("Redis PUB/SUB을 이용해 서버에서 알림 메세지를 수신할 수 있다.")
 	@Test
