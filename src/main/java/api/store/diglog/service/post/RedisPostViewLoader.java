@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import api.store.diglog.common.exception.CustomException;
@@ -25,7 +25,7 @@ public class RedisPostViewLoader {
 	private static final String LOCK_KEY_SUFFIX = ":lock";
 	private static final int DAILY_TTL_HOURS = 24;
 
-	private final RedisTemplate<String, String> redisTemplate;
+	private final StringRedisTemplate redisTemplate;
 	private final RedissonClient redissonClient;
 	private final PostRepository postRepository;
 
