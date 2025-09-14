@@ -2,7 +2,7 @@ package api.store.diglog.service.post;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.*;
+import static org.awaitility.Awaitility.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.core.RedisCallback;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
@@ -71,7 +72,10 @@ class PostAsyncWorkerTest extends IntegrationTestSupport {
 		postRepository.deleteAllInBatch();
 		folderRepository.deleteAllInBatch();
 		memberRepository.deleteAllInBatch();
-		redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+		redisTemplate.execute((RedisCallback<Void>)conn -> {
+			conn.serverCommands().flushDb();
+			return null;
+		});
 	}
 
 	@DisplayName("레디스의 조회수를 DB에 업데이트 후 DirtySet을 초기화한다.")
@@ -79,17 +83,16 @@ class PostAsyncWorkerTest extends IntegrationTestSupport {
 	void syncViewCountAllInBatch() {
 
 		// given
-		List<Post> posts = postRepository.saveAll(
-			IntStream.range(0, 5)
-				.mapToObj(i -> postRepository.save(Post.builder()
-					.title("title" + i)
-					.content("content" + i)
-					.viewCount(i)
-					.member(members.get(i))
-					.folder(folders.get(i))
-					.build()))
-				.toList()
-		);
+		List<Post> posts = IntStream.range(0, 5)
+			.mapToObj(i -> Post.builder()
+				.title("title" + i)
+				.content("content" + i)
+				.viewCount(i)
+				.member(members.get(i))
+				.folder(folders.get(i))
+				.build())
+			.toList();
+		postRepository.saveAll(posts);
 
 		Map<UUID, Long> updateViewCount = posts.stream()
 			.collect(Collectors.toMap(
@@ -134,17 +137,16 @@ class PostAsyncWorkerTest extends IntegrationTestSupport {
 	@Test
 	void syncViewCountAllInBatch_shouldIgnoreNull() {
 		// given
-		List<Post> posts = postRepository.saveAll(
-			IntStream.range(0, 5)
-				.mapToObj(i -> postRepository.save(Post.builder()
-					.title("title" + i)
-					.content("content" + i)
-					.viewCount(i)
-					.member(members.get(i))
-					.folder(folders.get(i))
-					.build()))
-				.toList()
-		);
+		List<Post> posts = IntStream.range(0, 5)
+			.mapToObj(i -> Post.builder()
+				.title("title" + i)
+				.content("content" + i)
+				.viewCount(i)
+				.member(members.get(i))
+				.folder(folders.get(i))
+				.build())
+			.toList();
+		postRepository.saveAll(posts);
 
 		Map<UUID, Long> updateViewCount = posts.stream()
 			.collect(Collectors.toMap(
@@ -206,17 +208,16 @@ class PostAsyncWorkerTest extends IntegrationTestSupport {
 	@Test
 	void syncViewCountAllInBatch_shouldIgnoreInvalidValues() {
 		// given
-		List<Post> posts = postRepository.saveAll(
-			IntStream.range(0, 5)
-				.mapToObj(i -> postRepository.save(Post.builder()
-					.title("title" + i)
-					.content("content" + i)
-					.viewCount(i)
-					.member(members.get(i))
-					.folder(folders.get(i))
-					.build()))
-				.toList()
-		);
+		List<Post> posts = IntStream.range(0, 5)
+			.mapToObj(i -> Post.builder()
+				.title("title" + i)
+				.content("content" + i)
+				.viewCount(i)
+				.member(members.get(i))
+				.folder(folders.get(i))
+				.build())
+			.toList();
+		postRepository.saveAll(posts);
 
 		Map<UUID, Long> updateViewCount = posts.stream()
 			.collect(Collectors.toMap(
@@ -251,7 +252,7 @@ class PostAsyncWorkerTest extends IntegrationTestSupport {
 							.extracting("id", "viewCount")
 							.containsExactlyInAnyOrderElementsOf(
 								updateViewCount.keySet().stream()
-									.filter(id -> id != notUpdatedPostId)
+									.filter(id -> !id.equals(notUpdatedPostId))
 									.map(postId -> tuple(postId, updateViewCount.get(postId)))
 									.toList()
 							);
@@ -278,17 +279,16 @@ class PostAsyncWorkerTest extends IntegrationTestSupport {
 	@Test
 	void syncViewCountAllInBatch_shouldIgnoreRedisViewCountIsLessThanDb() {
 		// given
-		List<Post> posts = postRepository.saveAll(
-			IntStream.range(0, 5)
-				.mapToObj(i -> postRepository.save(Post.builder()
-					.title("title" + i)
-					.content("content" + i)
-					.viewCount(i)
-					.member(members.get(i))
-					.folder(folders.get(i))
-					.build()))
-				.toList()
-		);
+		List<Post> posts = IntStream.range(0, 5)
+			.mapToObj(i -> Post.builder()
+				.title("title" + i)
+				.content("content" + i)
+				.viewCount(i)
+				.member(members.get(i))
+				.folder(folders.get(i))
+				.build())
+			.toList();
+		postRepository.saveAll(posts);
 
 		Map<UUID, Long> updateViewCount = posts.stream()
 			.collect(Collectors.toMap(
@@ -323,7 +323,7 @@ class PostAsyncWorkerTest extends IntegrationTestSupport {
 							.extracting("id", "viewCount")
 							.containsExactlyInAnyOrderElementsOf(
 								updateViewCount.keySet().stream()
-									.filter(id -> id != notUpdatedPostId)
+									.filter(id -> !id.equals(notUpdatedPostId))
 									.map(postId -> tuple(postId, updateViewCount.get(postId)))
 									.toList()
 							);
