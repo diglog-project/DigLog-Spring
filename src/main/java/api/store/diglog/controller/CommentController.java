@@ -1,5 +1,6 @@
 package api.store.diglog.controller;
 
+import api.store.diglog.model.dto.comment.CommentCreateResponse;
 import api.store.diglog.model.dto.comment.CommentListRequest;
 import api.store.diglog.model.dto.comment.CommentRequest;
 import api.store.diglog.model.dto.comment.CommentResponse;
@@ -24,10 +25,10 @@ public class CommentController {
 	private final CommentService commentService;
 
 	@PostMapping
-	public ResponseEntity<Void> save(@RequestBody CommentRequest commentRequest) {
-		commentService.save(commentRequest);
+	public ResponseEntity<CommentCreateResponse> save(@RequestBody CommentRequest commentRequest) {
+		CommentCreateResponse commentCreateResponse = commentService.save(commentRequest);
 
-		return ResponseEntity.status(HttpStatusCode.CREATED).build();
+		return ResponseEntity.status(HttpStatusCode.CREATED).body(commentCreateResponse);
 	}
 
 	@GetMapping

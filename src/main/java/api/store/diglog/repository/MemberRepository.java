@@ -5,9 +5,6 @@ import api.store.diglog.model.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -20,11 +17,9 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
 
 	Optional<Member> findByUsernameAndIsDeletedFalse(String username);
 
-	Page<Member> findAllByUsernameContainingIgnoreCaseAndIsDeletedFalse(String username, Pageable pageable);
+	Optional<Member> findByIdAndIsDeletedFalse(UUID id);
 
-	@Modifying
-	@Query("UPDATE Member m SET m.username = :username WHERE m.email = :email")
-	void updateUsername(@Param("username") String username, @Param("email") String email);
+	Page<Member> findAllByUsernameContainingIgnoreCaseAndIsDeletedFalse(String username, Pageable pageable);
 
 	int countByUsername(String username);
 

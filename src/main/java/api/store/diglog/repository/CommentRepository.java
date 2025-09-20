@@ -1,11 +1,11 @@
 package api.store.diglog.repository;
 
 import api.store.diglog.model.entity.Comment;
+import api.store.diglog.model.entity.Member;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CommentRepository extends JpaRepository<Comment, UUID> {
+
+	Optional<Comment> findByIdAndMember(UUID id, Member member);
 
 	Optional<Comment> findByIdAndIsDeletedFalse(UUID id);
 
@@ -32,8 +34,4 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
 	int getDepthByParentCommentId(@Param("parentCommentId") UUID parentCommentId, @Param("maxDepth") int maxDepth);
 
 	Page<Comment> findByPostIdAndParentCommentIdAndIsDeletedFalse(UUID postId, UUID parentId, Pageable pageable);
-
-	@Modifying
-	@Query(value = "UPDATE comment c SET c.is_deleted = TRUE WHERE c.id = :commentId AND c.member_id = :memberId", nativeQuery = true)
-	int updateIsDeletedByCommentIdAndMemberId(@Param("commentId") UUID commentId, @Param("memberId") UUID memberId);
 }

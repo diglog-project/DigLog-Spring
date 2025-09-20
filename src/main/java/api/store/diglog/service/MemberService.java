@@ -91,7 +91,10 @@ public class MemberService {
 	@Transactional
 	public void updateUsername(MemberUsernameRequest memberUsernameRequest) {
 		String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
-		memberRepository.updateUsername(memberUsernameRequest.getUsername(), email);
+		Member member = memberRepository.findByEmail(email)
+				.orElseThrow();
+
+		member.updateUsername(memberUsernameRequest.getUsername());
 	}
 
 	public MemberProfileResponse getProfile() {
@@ -138,6 +141,11 @@ public class MemberService {
 	public Member findActiveMemberByUsername(String username) {
 		return memberRepository.findByUsernameAndIsDeletedFalse(username)
 			.orElseThrow(() -> new CustomException(MEMBER_USERNAME_NOT_FOUND));
+	}
+
+	public Member findActiveMemberById(UUID id) {
+		return memberRepository.findByIdAndIsDeletedFalse(id)
+			.orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));
 	}
 
 	public Member findMemberById(UUID memberId) {

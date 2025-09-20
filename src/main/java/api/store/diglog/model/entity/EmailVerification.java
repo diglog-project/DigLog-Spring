@@ -51,4 +51,8 @@ public class EmailVerification {
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
+
+	public void verify() {
+		this.verified = true;
+	}
 }

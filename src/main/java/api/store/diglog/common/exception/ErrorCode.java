@@ -54,6 +54,25 @@ public enum ErrorCode {
 	COMMENT_IS_DELETED_NO_CHANGE(BAD_REQUEST, "댓글 삭제 권한이 없거나, 삭제가 완료되지 않았습니다."),
 	COMMENT_NOT_FOUND(BAD_REQUEST, "해당 댓글을 찾을 수 없습니다."),
 	COMMENT_UPDATE_NO_AUTHORITY(BAD_REQUEST, "해당 댓글을 수정할 수 있는 권한이 없습니다."),
+
+	// Redis
+	REDIS_UNAVAILABLE(SERVICE_UNAVAILABLE, "서비스 연결에 실패했습니다. 잠시 후 다시 시도해주세요."),
+	INVALID_REDIS_VIEW_COUNT_VALUE(INTERNAL_SERVER_ERROR, "조회수 처리에 실패했습니다. 잠시 후 다시 시도해주세요."),
+	REDIS_VIEW_COUNT_VALUE_MISSING(INTERNAL_SERVER_ERROR, "조회수 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요."),
+
+	// Subscription
+	SUBSCRIPTION_NOT_FOUND(BAD_REQUEST, "구독 내역이 존재하지 않습니다."),
+	SUBSCRIPTION_INACTIVE_AUTHOR(FORBIDDEN, "탈퇴한 회원은 구독할 수 없습니다."),
+	SUBSCRIPTION_SELF_SUBSCRIBED(BAD_REQUEST, "자기 자신은 구독할 수 없습니다."),
+	SUBSCRIPTION_ALREADY_SUBSCRIBED(CONFLICT, "이미 해당 작성자를 구독하고 있습니다."),
+	SUBSCRIPTION_EXCEED_SUBSCRIPTION_COUNT(BAD_REQUEST, "구독 가능한 최대 수(%d명)를 초과했습니다."),
+	SUBSCRIPTION_MISMATCH_CURRENT_MEMBER_SUBSCRIBER(FORBIDDEN, "구독 수정 권한이 없습니다."),
+
+	// Notification
+	NOTIFICATION_INVALID_NOTIFICATION_TYPE(BAD_REQUEST, "지원하지 않는 알림 타입입니다."),
+	NOTIFICATION_SELF_COMMENT(BAD_REQUEST, "게시글과 댓글의 작성자가 일치하는 경우엔 알림이 생성되지 않습니다."),
+	NOTIFICATION_NOT_FOUND(BAD_REQUEST, "해당 알림을 찾을 수 없습니다."),
+	NOTIFICATION_NO_PERMISSION(FORBIDDEN, "해당 알림의 변경 권한이 없습니다.")
 	;
 
 	private final HttpStatus status;

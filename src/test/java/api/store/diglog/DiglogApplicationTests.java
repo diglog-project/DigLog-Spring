@@ -1,13 +1,13 @@
 package api.store.diglog;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class DiglogApplicationTests {
+import api.store.diglog.supporter.IntegrationTestSupport;
 
-    @Test
-    void contextLoads() {
-    }
+class DiglogApplicationTests extends IntegrationTestSupport {
+
+	@Test
+	void contextLoads() {
+	}
 
 }

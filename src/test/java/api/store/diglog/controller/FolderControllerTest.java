@@ -14,15 +14,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithUserDetails;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
@@ -32,22 +25,12 @@ import api.store.diglog.model.dto.folder.FolderPostCountResponse;
 import api.store.diglog.model.dto.folder.FolderResponse;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
-import api.store.diglog.service.FolderService;
+import api.store.diglog.supporter.ControllerTestSupport;
 
-@WebMvcTest(controllers = FolderController.class)
-class FolderControllerTest {
+class FolderControllerTest extends ControllerTestSupport {
 
 	private static final String EMAIL = "diglog@example.com";
 	private static final String PASSWORD = "qwer1234";
-
-	@Autowired
-	private MockMvc mockMvc;
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@MockitoBean
-	private FolderService folderService;
 
 	@DisplayName("폴더 목록을 생성할 수 있다.")
 	@Test

@@ -1,6 +1,7 @@
 package api.store.diglog.service;
 
 import api.store.diglog.common.exception.CustomException;
+import api.store.diglog.model.dto.comment.CommentCreateResponse;
 import api.store.diglog.model.dto.comment.CommentListRequest;
 import api.store.diglog.model.dto.comment.CommentRequest;
 import api.store.diglog.model.dto.comment.CommentResponse;
@@ -32,7 +33,7 @@ public class CommentService {
 	private final MemberService memberService;
 
 	@Transactional
-	public void save(CommentRequest commentRequest) {
+	public CommentCreateResponse save(CommentRequest commentRequest) {
 		Member member = memberService.getCurrentMember();
 		Post post = Post.builder().id(commentRequest.getPostId()).build();
 		Comment parentComment = getParentComment(commentRequest.getParentCommentId());
@@ -46,6 +47,10 @@ public class CommentService {
 			.taggedMember(taggedMember)
 			.build();
 		commentRepository.save(comment);
+
+		return CommentCreateResponse.builder()
+			.id(comment.getId())
+			.build();
 	}
 
 	private Comment getParentComment(UUID parentCommentId) {
@@ -115,11 +120,9 @@ public class CommentService {
 	@Transactional
 	public void delete(UUID commentId) {
 		Member member = memberService.getCurrentMember();
+		Comment comment = commentRepository.findByIdAndMember(commentId, member)
+			.orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
 
-		int result = commentRepository.updateIsDeletedByCommentIdAndMemberId(commentId, member.getId());
-
-		if (result <= 0) {
-			throw new CustomException(COMMENT_IS_DELETED_NO_CHANGE);
-		}
+		comment.softDelete();
 	}
 }

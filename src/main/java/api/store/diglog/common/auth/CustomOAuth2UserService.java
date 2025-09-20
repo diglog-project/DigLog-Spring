@@ -8,6 +8,7 @@ import api.store.diglog.model.dto.login.OAuth2Response;
 import api.store.diglog.model.dto.member.MemberInfoResponse;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.repository.MemberRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 	private final MemberRepository memberRepository;
