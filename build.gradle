@@ -44,9 +44,7 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'com.h2database:h2'
     testImplementation 'org.testcontainers:testcontainers'
-    testImplementation 'org.testcontainers:mysql'
     testImplementation 'org.testcontainers:junit-jupiter'
-    testImplementation "org.testcontainers:redis"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.awaitility:awaitility:4.2.0'
 
