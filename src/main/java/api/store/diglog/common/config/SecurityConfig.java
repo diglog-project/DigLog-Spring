@@ -66,6 +66,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, tagGetApi).permitAll()
 				.requestMatchers(HttpMethod.GET, subscribeGetApi).permitAll()
 				.requestMatchers(HttpMethod.GET, healthCheckApi).permitAll()
+				.requestMatchers(HttpMethod.HEAD, healthCheckApi).permitAll()
 				.anyRequest().authenticated())
 
 			.csrf(AbstractHttpConfigurer::disable)
