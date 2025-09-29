@@ -9,7 +9,7 @@ import api.store.diglog.model.dto.healthcheck.HealthCheckResponse;
 @RestController
 public class HealthController {
 
-	@GetMapping("/api/health-check")
+	@GetMapping({"/api/health-check", "/health-check"})
 	public ResponseEntity<HealthCheckResponse> healthCheck() {
 		return ResponseEntity.ok().body(HealthCheckResponse.ok());
 	}
